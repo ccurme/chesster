@@ -1,4 +1,5 @@
 import os
+from textwrap import dedent
 
 import chess
 import chess.engine
@@ -49,13 +50,18 @@ def main():
 
         engine = _get_stockfish_engine()
         engine_result = engine.play(board, chess.engine.Limit(time=0.1))
-        context = SystemMessage(content=f"""Current board state:
-    {serialize_board_state(board)}
+        context = SystemMessage(
+            content=dedent(
+                f"""
+                Current board state:
+                {serialize_board_state(board)}
 
-    Player last move:
-    {user_move_san}
+                Player last move:
+                {user_move_san}
 
-    """)
+                """
+            ).strip()
+        )
         user_message = f"I just played {user_move_san}. How's that look?"
 
         commentary = chain.invoke({"board_context": context, "user_message": user_message, "chat_history": chat_history})
