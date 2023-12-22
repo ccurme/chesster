@@ -7,7 +7,7 @@ from IPython.display import clear_output, display
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from chesster.chain import get_analysis_chain
-from chesster.utils import serialize_board_state
+from chesster.utils import display_board, serialize_board_state
 
 
 def _get_user_move(board: chess.Board) -> chess.Move:
@@ -39,20 +39,36 @@ def _get_engine_move(board: chess.Board) -> chess.Move:
     return engine_result.move
 
 
+def _get_player_side():
+    display("User plays as black or white?")
+    player_side_str = input()
+    clear_output()
+    if "w" in player_side_str.lower():
+        return chess.WHITE
+    else:
+        return chess.BLACK
+
+
 def main():
+
+    player_side = _get_player_side()
 
     board = chess.Board()
     chain = get_analysis_chain()
     chat_history = []
 
+    if player_side == chess.BLACK:
+        engine_move = _get_engine_move(board)
+        board.push(engine_move)
+
     while not board.is_game_over():
-        display(board)
+        display_board(board, player_side=player_side)
         user_move = _get_user_move(board)
         user_move_san = board.san(user_move)
         board.push(user_move)
 
         clear_output()
-        display(board)
+        display_board(board, player_side=player_side)
         display(user_move_san)
 
         context = SystemMessage(
