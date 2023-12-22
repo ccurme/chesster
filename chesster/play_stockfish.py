@@ -7,7 +7,7 @@ from IPython.display import clear_output, display
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from chesster.chain import get_analysis_chain
-from chesster.utils import display_board, serialize_board_state
+from chesster.utils import display_board, make_system_message
 
 
 def _get_user_move(board: chess.Board) -> chess.Move:
@@ -40,6 +40,7 @@ def _get_engine_move(board: chess.Board) -> chess.Move:
 
 
 def _get_player_side():
+    """Get side for user at game start."""
     display("User plays as black or white?")
     player_side_str = input()
     clear_output()
@@ -50,7 +51,7 @@ def _get_player_side():
 
 
 def main():
-
+    """Gameplay loop."""
     player_side = _get_player_side()
 
     board = chess.Board()
@@ -69,20 +70,8 @@ def main():
 
         clear_output()
         display_board(board, player_side=player_side)
-        display(user_move_san)
 
-        context = SystemMessage(
-            content=dedent(
-                f"""
-                Current board state:
-                {serialize_board_state(board)}
-
-                Player last move:
-                {user_move_san}
-
-                """
-            ).strip()
-        )
+        context = SystemMessage(content=make_system_message(board, player_side))
         user_message = f"I just played {user_move_san}. How's that look?"
 
         commentary = chain.invoke({"board_context": context, "user_message": user_message, "chat_history": chat_history})
