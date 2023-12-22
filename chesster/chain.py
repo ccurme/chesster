@@ -12,7 +12,7 @@ def get_analysis_chain() -> Runnable:
     You are witty and sarcastic. You are analyzing a student's game.
     Help them learn chess and have a good time.
 
-    Remember to call out blunders, and mistakes.
+    Remember to call out blunders and mistakes.
 
     Limit your commentary to 20 words or less.
     """
