@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "chesster"
+version = "0.1.0"
+description = "AI chess guide."
+authors = []
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/ccurme/chesster"
+
+[tool.poetry.dependencies]
+python = ">= 3.9, < 4.0"
+ipython = "^8.8.0"
+chess = ">= 1.0, < 2.0"
+langchain = ">= 0.0.350, < 1.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.2.0"
+pytest-cov = "^4.0.0"
+
+[tool.poetry.group.lint.dependencies]
+black = "^22.10.0"
+isort = "^5.10.1"
+flake8 = "^6.0.0"
+
+[tool.poetry.group.typing.dependencies]
+mypy = "^0.991"
+
+[tool.poetry.group.dev.dependencies]
+jupyter = "^1.0.0"
+
+[tool.isort]
+profile = "black"
+src_paths = ["ghost"]
+
+[tool.mypy]
+ignore_missing_imports = "True"
+disallow_untyped_defs = "True"
+exclude = ["tests"]
