@@ -19,13 +19,15 @@ def _get_user_move(board: chess.Board) -> chess.Move:
         display("Illegal move, try again.")
         user_move_uci = input()
         user_move = chess.Move.from_uci(user_move_uci)
-    
+
     return user_move
 
 
 def _get_stockfish_engine(skill_level: int = 3) -> chess.engine.SimpleEngine:
     """Load Stockfish engine."""
-    engine_path = os.getenv("STOCKFISH_ENGINE_PATH", "stockfish/stockfish-ubuntu-x86-64-modern")
+    engine_path = os.getenv(
+        "STOCKFISH_ENGINE_PATH", "stockfish/stockfish-ubuntu-x86-64-modern"
+    )
     engine = chess.engine.SimpleEngine.popen_uci(engine_path)
     engine.configure({"Skill Level": skill_level})
 
@@ -74,7 +76,13 @@ def main():
         context = SystemMessage(content=make_system_message(board, player_side))
         user_message = f"I just played {user_move_san}. How's that look?"
 
-        commentary = chain.invoke({"board_context": context, "user_message": user_message, "chat_history": chat_history})
+        commentary = chain.invoke(
+            {
+                "board_context": context,
+                "user_message": user_message,
+                "chat_history": chat_history,
+            }
+        )
         chat_history.extend(
             [
                 HumanMessage(content=user_message),

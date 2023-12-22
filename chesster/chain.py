@@ -6,6 +6,7 @@ from langchain.schema import StrOutputParser
 
 MEMORY_KEY = "chat_history"
 
+
 def get_analysis_chain() -> Runnable:
     """Get Langchain Runnable for analyzing board."""
     system_message = """You are a seasoned chess instructor.
