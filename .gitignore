@@ -1,0 +1,14 @@
+.vscode/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Unit test / coverage reports
+.coverage
+coverage.xml
+.pytest_cache/
