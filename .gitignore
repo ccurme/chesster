@@ -12,3 +12,6 @@ __pycache__/
 .coverage
 coverage.xml
 .pytest_cache/
+
+# Stockfish engine
+stockfish-ubuntu-*
