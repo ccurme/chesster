@@ -1,1 +1,1 @@
-# chesster
+# ♟️ Chesster
