@@ -10,15 +10,6 @@ from chesster.chain import get_analysis_chain
 from chesster.utils import serialize_board_state
 
 
-def _get_stockfish_engine(skill_level: int = 3) -> chess.engine.SimpleEngine:
-    """Load Stockfish engine."""
-    engine_path = os.getenv("STOCKFISH_ENGINE_PATH", "stockfish/stockfish-ubuntu-x86-64-modern")
-    engine = chess.engine.SimpleEngine.popen_uci(engine_path)
-    engine.configure({"Skill Level": skill_level})
-
-    return engine
-
-
 def _get_user_move(board: chess.Board) -> chess.Move:
     """Get move from user input."""
     user_move_uci = input()
@@ -30,6 +21,22 @@ def _get_user_move(board: chess.Board) -> chess.Move:
         user_move = chess.Move.from_uci(user_move_uci)
     
     return user_move
+
+
+def _get_stockfish_engine(skill_level: int = 3) -> chess.engine.SimpleEngine:
+    """Load Stockfish engine."""
+    engine_path = os.getenv("STOCKFISH_ENGINE_PATH", "stockfish/stockfish-ubuntu-x86-64-modern")
+    engine = chess.engine.SimpleEngine.popen_uci(engine_path)
+    engine.configure({"Skill Level": skill_level})
+
+    return engine
+
+
+def _get_engine_move(board: chess.Board) -> chess.Move:
+    """Get move from engine."""
+    engine = _get_stockfish_engine()
+    engine_result = engine.play(board, chess.engine.Limit(time=0.1))
+    return engine_result.move
 
 
 def main():
@@ -48,8 +55,6 @@ def main():
         display(board)
         display(user_move_san)
 
-        engine = _get_stockfish_engine()
-        engine_result = engine.play(board, chess.engine.Limit(time=0.1))
         context = SystemMessage(
             content=dedent(
                 f"""
@@ -71,6 +76,7 @@ def main():
                 AIMessage(content=commentary),
             ]
         )
-        board.push(engine_result.move)
+        engine_move = _get_engine_move(board)
+        board.push(engine_move)
         clear_output()
         display(commentary)
