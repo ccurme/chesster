@@ -9,7 +9,11 @@ from chesster import play_stockfish
 def _make_mock_llm(*args, **kwargs) -> Runnable:
     """Make mock llm for testing."""
     llm = MagicMock(spec=Runnable)
-    llm.invoke.return_value = "Mock LLM response."
+    llm.invoke.side_effect = [
+        '{"move": "d2d4", "commentary": "Mock LLM response."}',
+        '{"move": "b1c3", "commentary": "Mock LLM response."}',
+        '{"move": "c1f4", "commentary": "Mock LLM response."}',
+    ]
 
     return llm
 
@@ -19,7 +23,7 @@ def _make_mock_llm(*args, **kwargs) -> Runnable:
     "chesster.play_stockfish.chess.Board.is_game_over",
     side_effect=[False, False, False, True],
 )
-@patch("chesster.chain.ChatOpenAI", return_value=_make_mock_llm)
+@patch("chesster.chain.ChatOpenAI", return_value=_make_mock_llm())
 def test_play_stockfish(
     mock_llm: Callable, mock_is_game_over: Callable, user_input: Callable
 ):
