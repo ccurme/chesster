@@ -74,7 +74,10 @@ def main() -> chess.Board:
         )
         user_move_uci = response["move"]
         if user_move_uci:
-            user_move = chess.Move.from_uci(user_move_uci)
+            try:
+                user_move = chess.Move.from_uci(user_move_uci)
+            except chess.InvalidMoveError:
+                user_move = board.parse_san(user_move_uci)  # LLM sometimes outputs SAN
             board.push(user_move)
 
             clear_output()
