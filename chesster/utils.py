@@ -23,11 +23,10 @@ def display_board(board: chess.Board, player_side: chess.Color = chess.WHITE) ->
         )
     else:
         delimiter = "---------------"
+        print(delimiter)
         if flipped:
-            print(delimiter)
             print(board.mirror())
         else:
-            print(delimiter)
             print(board)
 
 
