@@ -11,11 +11,35 @@ def _make_mock_llm(*args, **kwargs) -> Runnable:
     """Make mock llm for testing."""
     llm = MagicMock(spec=Runnable)
     llm.invoke.side_effect = [
-        AIMessage(content="", additional_kwargs={'function_call': {'arguments': '{"move":"d2d4"}', 'name': 'make_chess_move'}}),
+        AIMessage(
+            content="",
+            additional_kwargs={
+                "function_call": {
+                    "arguments": '{"move":"d2d4"}',
+                    "name": "make_chess_move",
+                }
+            },
+        ),
         AIMessage(content="Solid opening."),
-        AIMessage(content="", additional_kwargs={'function_call': {'arguments': '{"move":"b1c3"}', 'name': 'make_chess_move'}}),
+        AIMessage(
+            content="",
+            additional_kwargs={
+                "function_call": {
+                    "arguments": '{"move":"b1c3"}',
+                    "name": "make_chess_move",
+                }
+            },
+        ),
         AIMessage(content=""),
-        AIMessage(content="", additional_kwargs={'function_call': {'arguments': '{"move":"c1f4"}', 'name': 'make_chess_move'}}),
+        AIMessage(
+            content="",
+            additional_kwargs={
+                "function_call": {
+                    "arguments": '{"move":"c1f4"}',
+                    "name": "make_chess_move",
+                }
+            },
+        ),
         AIMessage(content=""),
     ]
     llm.bind = lambda *args, **kwargs: llm

@@ -21,7 +21,7 @@ class ChessMoveInput(BaseModel):
 
 
 def make_chess_move(board: chess.Board, move_uci: str) -> None:
-    """"Use this tool to make a chess move. Input the move in UCI format."""
+    """ "Use this tool to make a chess move. Input the move in UCI format."""
     try:
         move = chess.Move.from_uci(move_uci)
     except chess.InvalidMoveError:
@@ -59,7 +59,9 @@ def get_analysis_agent(tools: list[Tool]) -> Runnable:
     )
 
     llm = ChatOpenAI(model="gpt-4-1106-preview", temperature=0)
-    llm_with_tools = llm.bind(functions=[format_tool_to_openai_function(tool) for tool in tools])
+    llm_with_tools = llm.bind(
+        functions=[format_tool_to_openai_function(tool) for tool in tools]
+    )
 
     agent = (
         {
