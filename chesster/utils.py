@@ -36,9 +36,19 @@ def serialize_board_state(board: chess.Board) -> str:
     return chess.Board().variation_san(board.move_stack)
 
 
+def serialize_player_side(player_side: chess.Color) -> str:
+    """Cast player side to string."""
+    if player_side == chess.WHITE:
+        return "white"
+    else:
+        return "black"
+
+
 def make_system_message(board: chess.Board, player_side: chess.Color) -> str:
     """Make message capturing board state."""
     board_state_str = f"""
+        Player is playing as {serialize_player_side(player_side)}.
+
         Current board state:
         {serialize_board_state(board)}
     """
