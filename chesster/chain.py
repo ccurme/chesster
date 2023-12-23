@@ -43,8 +43,11 @@ def get_analysis_chain() -> Runnable:
         ]
     )
 
-    llm = ChatOpenAI(model="gpt-4-1106-preview", temperature=0)
-    llm.bind(response_format={"type": "json_object"})
+    llm = ChatOpenAI(
+        model="gpt-4-1106-preview",
+        temperature=0,
+        model_kwargs={"response_format": {"type": "json_object"}},
+    )
 
     chain = (
         {
