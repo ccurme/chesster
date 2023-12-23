@@ -22,7 +22,7 @@ def display_board(board: chess.Board, player_side: chess.Color = chess.WHITE) ->
             chess.svg.board(board, flipped=flipped, size=board_size, lastmove=last_move)
         )
     else:
-        delimiter = "------------"
+        delimiter = "---------------"
         if flipped:
             print(delimiter)
             print(board.mirror())
