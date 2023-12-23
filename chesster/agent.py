@@ -29,7 +29,7 @@ def _make_chess_move(board: chess.Board, move_uci: str) -> None:
     board.push(move)
 
 
-def _get_tools(board: chess.Board | None) -> list[Tool]:
+def _get_tools(board: chess.Board | None = None) -> list[Tool]:
     """Get tools given a board."""
     # N.B. we accept None as a hack to make it easy to generate function definitions
     # without a board.
@@ -62,7 +62,7 @@ def get_analysis_agent() -> Runnable:
 
     Limit your commentary to 20 words or fewer.
     """
-    tools = _get_tools(None)
+    tools = _get_tools()
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", dedent(system_message)),
