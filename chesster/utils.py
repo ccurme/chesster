@@ -18,7 +18,9 @@ def display_board(board: chess.Board, player_side: chess.Color = chess.WHITE) ->
             last_move = board.move_stack[-1]
         else:
             last_move = None
-        display(chess.svg.board(board, flipped=flipped, size=board_size, lastmove=last_move))
+        display(
+            chess.svg.board(board, flipped=flipped, size=board_size, lastmove=last_move)
+        )
     else:
         delimiter = "------------"
         if flipped:
