@@ -1,14 +1,13 @@
-import json
 import os
 import time
 
 import chess
 import chess.engine
 from IPython.display import clear_output, display
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, HumanMessage
 
-from chesster.chain import get_analysis_chain
-from chesster.utils import display_board, make_system_message
+from chesster.agent import query_agent
+from chesster.utils import display_board
 
 
 def _get_stockfish_engine(skill_level: int = 3) -> chess.engine.SimpleEngine:
@@ -43,10 +42,8 @@ def _get_player_side():
 
 def main() -> chess.Board:
     """Gameplay loop."""
-    board.player_side = _get_player_side()
-
     board = chess.Board()
-    chain = get_analysis_chain()
+    board.player_side = _get_player_side()
     chat_history = []
 
     if board.player_side == chess.BLACK:
@@ -56,30 +53,15 @@ def main() -> chess.Board:
     while not board.is_game_over():
         display_board(board)
         user_message = input()
-        context = SystemMessage(content=make_system_message(board))
-        response_str = chain.invoke(
-            {
-                "board_context": context,
-                "user_message": user_message,
-                "chat_history": chat_history,
-            }
-        )
-        response = json.loads(response_str)
-        commentary = response["commentary"]
+        response = query_agent(user_message, board, chat_history)
+        commentary = response["output"]
         chat_history.extend(
             [
                 HumanMessage(content=user_message),
                 AIMessage(content=commentary),
             ]
         )
-        user_move_uci = response["move"]
-        if user_move_uci:
-            try:
-                user_move = chess.Move.from_uci(user_move_uci)
-            except chess.InvalidMoveError:
-                user_move = board.parse_san(user_move_uci)  # LLM sometimes outputs SAN
-            board.push(user_move)
-
+        if board.turn != board.player_side:
             clear_output()
             display_board(board)
 
