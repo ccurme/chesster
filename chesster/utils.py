@@ -2,6 +2,7 @@ from textwrap import dedent
 
 import chess
 import chess.svg
+from IPython.core.interactiveshell import InteractiveShell
 from IPython.display import display
 
 
@@ -9,9 +10,23 @@ def display_board(board: chess.Board, player_side: chess.Color = chess.WHITE) ->
     """Display board."""
     board_size = 360
     if player_side == chess.WHITE:
-        display(chess.svg.board(board, size=board_size))
+        flipped = False
     else:
-        display(chess.svg.board(board, flipped=True, size=board_size))
+        flipped = True
+    if InteractiveShell.initialized():
+        if board.move_stack:
+            last_move = board.move_stack[-1]
+        else:
+            last_move = None
+        display(chess.svg.board(board, flipped=flipped, size=board_size, lastmove=last_move))
+    else:
+        delimiter = "------------"
+        if flipped:
+            print(delimiter)
+            print(board.mirror())
+        else:
+            print(delimiter)
+            print(board)
 
 
 def serialize_board_state(board: chess.Board) -> str:

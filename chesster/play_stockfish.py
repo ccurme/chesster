@@ -37,6 +37,7 @@ def _get_engine_move(board: chess.Board) -> chess.Move:
     """Get move from engine."""
     engine = _get_stockfish_engine()
     engine_result = engine.play(board, chess.engine.Limit(time=0.1))
+    engine.quit()
     return engine_result.move
 
 
@@ -51,7 +52,7 @@ def _get_player_side():
         return chess.BLACK
 
 
-def main():
+def main() -> chess.Board:
     """Gameplay loop."""
     player_side = _get_player_side()
 
@@ -92,3 +93,5 @@ def main():
         board.push(engine_move)
         clear_output()
         display(commentary)
+
+    return board
