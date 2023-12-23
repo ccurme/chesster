@@ -43,20 +43,20 @@ def _get_player_side():
 
 def main() -> chess.Board:
     """Gameplay loop."""
-    player_side = _get_player_side()
+    board.player_side = _get_player_side()
 
     board = chess.Board()
     chain = get_analysis_chain()
     chat_history = []
 
-    if player_side == chess.BLACK:
+    if board.player_side == chess.BLACK:
         engine_move = _get_engine_move(board)
         board.push(engine_move)
 
     while not board.is_game_over():
-        display_board(board, player_side=player_side)
+        display_board(board)
         user_message = input()
-        context = SystemMessage(content=make_system_message(board, player_side))
+        context = SystemMessage(content=make_system_message(board))
         response_str = chain.invoke(
             {
                 "board_context": context,
@@ -81,7 +81,7 @@ def main() -> chess.Board:
             board.push(user_move)
 
             clear_output()
-            display_board(board, player_side=player_side)
+            display_board(board)
 
             engine_move = _get_engine_move(board)
             time.sleep(0.5)
