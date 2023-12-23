@@ -8,10 +8,10 @@ from langchain.agents.format_scratchpad import format_to_openai_function_message
 from langchain_community.chat_models import ChatOpenAI
 from langchain_core.messages import SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.runnables import Runnable
 from langchain.tools import Tool
 from langchain.tools.render import format_tool_to_openai_function
-from pydantic import BaseModel, Field
 
 from chesster.utils import make_system_message
 
