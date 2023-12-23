@@ -20,7 +20,7 @@ class ChessMoveInput(BaseModel):
     move: str = Field()
 
 
-def make_chess_move(board: chess.Board, move_uci: str) -> None:
+def _make_chess_move(board: chess.Board, move_uci: str) -> None:
     """ "Use this tool to make a chess move. Input the move in UCI format."""
     try:
         move = chess.Move.from_uci(move_uci)
@@ -29,7 +29,21 @@ def make_chess_move(board: chess.Board, move_uci: str) -> None:
     board.push(move)
 
 
-def get_analysis_agent(tools: list[Tool]) -> Runnable:
+def _get_tools(board: chess.Board | None) -> list[Tool]:
+    """Get tools given a board."""
+    # N.B. we accept None as a hack to make it easy to generate function definitions
+    # without a board.
+    chess_move_tool = Tool.from_function(
+        func=partial(_make_chess_move, board),
+        name="make_chess_move",
+        description="Use this tool to make a chess move. Input the move in UCI format.",
+        args_schema=ChessMoveInput,
+    )
+
+    return [chess_move_tool]
+
+
+def get_analysis_agent() -> Runnable:
     """Get Langchain Runnable for analyzing and modifying board."""
     system_message = """
     You are a seasoned chess instructor. You are witty and sarcastic.
@@ -48,6 +62,7 @@ def get_analysis_agent(tools: list[Tool]) -> Runnable:
 
     Limit your commentary to 20 words or fewer.
     """
+    tools = _get_tools(None)
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", dedent(system_message)),
@@ -82,15 +97,8 @@ def get_analysis_agent(tools: list[Tool]) -> Runnable:
 
 def query_agent(user_message: str, board: chess.Board, chat_history: list) -> dict:
     """Build board context and query agent."""
-    # TODO: Pass tool through invoke
-    chess_move_tool = Tool.from_function(
-        func=partial(make_chess_move, board),
-        name="make_chess_move",
-        description="Use this tool to make a chess move. Input the move in UCI format.",
-        args_schema=ChessMoveInput,
-    )
-    tools = [chess_move_tool]
-    agent = get_analysis_agent(tools)
+    agent = get_analysis_agent()
+    tools = _get_tools(board)
     agent_executor = AgentExecutor(agent=agent, tools=tools)
 
     board_context = SystemMessage(content=make_system_message(board))
