@@ -13,7 +13,7 @@ from langchain_core.runnables import Runnable
 from langchain.tools import Tool
 from langchain.tools.render import format_tool_to_openai_function
 
-from chesster.utils import make_system_message
+from chesster.utils import make_system_message, parse_chess_move
 
 
 class ChessMoveInput(BaseModel):
@@ -22,10 +22,7 @@ class ChessMoveInput(BaseModel):
 
 def _make_chess_move(board: chess.Board, move_uci: str) -> None:
     """ "Use this tool to make a chess move. Input the move in UCI format."""
-    try:
-        move = chess.Move.from_uci(move_uci)
-    except chess.InvalidMoveError:
-        move = board.parse_san(move_uci)  # LLM sometimes outputs SAN
+    move = parse_chess_move(board, move_uci)
     board.push(move)
 
 

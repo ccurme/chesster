@@ -6,7 +6,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from typing import List
 
-from chesster.utils import display_board
+from chesster.utils import display_board, parse_chess_move
 
 app = FastAPI()
 
@@ -49,6 +49,12 @@ class BoardManager:
         await self.update_board(self.board)
 
 
+    async def make_move(self, move: chess.Move) -> None:
+        """Parse move and update board."""
+        self.board.push(move)
+        await self.update_board(self.board)
+
+
     async def update_board(self, board: chess.Board) -> None:
         """Update SVG string."""
         board_svg = urllib.parse.quote(str(display_board(board, self.player_side)))
@@ -73,6 +79,7 @@ class BoardManager:
 
 board_manager = BoardManager()
 
+
 @app.get("/")
 async def get():
     return HTMLResponse(html)
@@ -80,6 +87,7 @@ async def get():
 
 @app.get("/set_player_side/{color}")
 async def set_player_side(color: str):
+    """Set side to black or white."""
     if "w" in color:
         player_side = chess.WHITE
         side_str = "white"
@@ -90,10 +98,13 @@ async def set_player_side(color: str):
     return {"message": f"Updated player side successfully to {side_str}."}
 
 
-@app.get("/update_image/{color}")
-async def update_image(color: int):
-    await board_manager.update_image(color)
-    return {"message": "Image updated successfully", "color": color}
+@app.get("/make_move/{move_str}")
+async def make_move(move_str: str):
+    """Push move to board. Move should be a valid UCI string."""
+    move = parse_chess_move(board_manager.board, move_str)
+    move_san = board_manager.board.san(move)
+    await board_manager.make_move(move)
+    return {"message": f"Updated player side successfully to {move_san}."}
 
 
 @app.websocket("/ws")

@@ -26,6 +26,14 @@ def get_stockfish_engine(skill_level: int = 3) -> chess.engine.SimpleEngine:
     return engine
 
 
+def parse_chess_move(board: chess.Board, move_uci: str) -> chess.Move:
+    """ "Use this tool to make a chess move. Input the move in UCI format."""
+    try:
+        return chess.Move.from_uci(move_uci)
+    except chess.InvalidMoveError:
+        return board.parse_san(move_uci)  # LLM sometimes outputs SAN
+
+
 def parse_pgn_into_move_list(game_pgn: str) -> Iterable[chess.Move]:
     """Parse PGN into list of Move objects."""
     pgn_fp = io.StringIO(game_pgn)
