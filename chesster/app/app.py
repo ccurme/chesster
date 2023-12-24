@@ -7,10 +7,15 @@ from fastapi.responses import HTMLResponse
 
 from chesster.app.board_manager import BoardManager
 from chesster.app.html import html_string
-from chesster.utils import get_engine_move, parse_chess_move, serialize_board_state
+from chesster.utils import (
+    get_engine_move,
+    parse_chess_move,
+    parse_pgn_into_move_list,
+    serialize_board_state,
+)
+
 
 app = FastAPI()
-
 
 board_manager = BoardManager()
 
@@ -61,6 +66,21 @@ async def make_move_vs_opponent(move_str: str) -> dict:
         f"Successfully made move to {move_san}. Opponent responded by moving"
         f" to {opponent_move_san}.\n\n"
         f"Board state:\n{serialize_board_state(board_manager.board, board_manager.player_side)}"
+    )
+    return {"message": response}
+
+
+@app.get("/make_board_from_pgn/{pgn_str}/{player_side_str}")
+async def make_board_from_pgn(pgn_str: str, player_side_str: str) -> dict:
+    """Initialize board from PGN string."""
+    move_stack = parse_pgn_into_move_list(pgn_str)
+    await board_manager.set_board(chess.Board())
+    _ = await set_player_side(player_side_str)
+    for move in move_stack:
+        await board_manager.make_move(move)
+    response = (
+        "Successfully uploaded board. Board state:\n"
+        f"{serialize_board_state(board_manager.board, board_manager.player_side)}"
     )
     return {"message": response}
 
