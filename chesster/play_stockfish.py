@@ -6,15 +6,7 @@ from IPython.display import clear_output, display
 from langchain_core.messages import AIMessage, HumanMessage
 
 from chesster.game_agent import query_agent
-from chesster.utils import display_board, get_stockfish_engine
-
-
-def _get_engine_move(board: chess.Board) -> chess.Move:
-    """Get move from engine."""
-    engine = get_stockfish_engine()
-    engine_result = engine.play(board, chess.engine.Limit(time=0.1))
-    engine.quit()
-    return engine_result.move
+from chesster.utils import display_board, get_engine_move
 
 
 def _get_player_side():
@@ -35,7 +27,7 @@ def main() -> chess.Board:
     chat_history = []
 
     if board.player_side == chess.BLACK:
-        engine_move = _get_engine_move(board)
+        engine_move = get_engine_move(board)
         board.push(engine_move)
 
     while not board.is_game_over():
@@ -53,7 +45,7 @@ def main() -> chess.Board:
             clear_output()
             display_board(board)
 
-            engine_move = _get_engine_move(board)
+            engine_move = get_engine_move(board)
             time.sleep(0.5)
             board.push(engine_move)
         clear_output()

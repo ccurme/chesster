@@ -1,3 +1,4 @@
+import time
 import urllib
 
 import chess
@@ -6,7 +7,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from typing import List
 
-from chesster.utils import display_board, parse_chess_move
+from chesster.utils import display_board, get_engine_move, parse_chess_move
 
 app = FastAPI()
 
@@ -41,6 +42,12 @@ class BoardManager:
         self.last_updated_image = None
         self.board = chess.Board()
         self.player_side = chess.WHITE
+
+
+    async def set_board(self, board: chess.Board) -> None:
+        """Set board."""
+        self.board = board
+        await self.update_board(self.board)
 
 
     async def set_player_side(self, player_side: chess.Color) -> None:
@@ -86,7 +93,7 @@ async def get():
 
 
 @app.get("/set_player_side/{color}")
-async def set_player_side(color: str):
+async def set_player_side(color: str) -> dict:
     """Set side to black or white."""
     if "w" in color:
         player_side = chess.WHITE
@@ -98,13 +105,34 @@ async def set_player_side(color: str):
     return {"message": f"Updated player side successfully to {side_str}."}
 
 
-@app.get("/make_move/{move_str}")
-async def make_move(move_str: str):
-    """Push move to board. Move should be a valid UCI string."""
+@app.get("/initialize_game_vs_opponent/{player_side_str}")
+async def initialize_game_vs_opponent(player_side_str: str) -> dict:
+    await board_manager.set_board(chess.Board())
+    _ = await set_player_side(player_side_str)
+    if board_manager.player_side == chess.BLACK:
+        opponent_move = get_engine_move(board_manager.board)
+        await board_manager.make_move(opponent_move)
+
+    return {"message": "Game initialized."}
+
+
+@app.get("/make_move_vs_opponent/{move_str}")
+async def make_move_vs_opponent(move_str: str) -> dict:
+    """Push move to board against engine. Move should be a valid UCI string."""
+    if board_manager.board.is_game_over():
+        return {"message": "Game over."}
     move = parse_chess_move(board_manager.board, move_str)
     move_san = board_manager.board.san(move)
     await board_manager.make_move(move)
-    return {"message": f"Updated player side successfully to {move_san}."}
+    opponent_move = get_engine_move(board_manager.board)
+    opponent_move_san = board_manager.board.san(opponent_move)
+    time.sleep(1)
+    await board_manager.make_move(opponent_move)
+    response = (
+        f"Successfully made move to {move_san}. Opponent responded by moving"
+        f" to {opponent_move_san}."
+    )
+    return {"message": response}
 
 
 @app.websocket("/ws")

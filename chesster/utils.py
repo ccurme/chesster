@@ -26,6 +26,14 @@ def get_stockfish_engine(skill_level: int = 3) -> chess.engine.SimpleEngine:
     return engine
 
 
+def get_engine_move(board: chess.Board) -> chess.Move:
+    """Get move from engine."""
+    engine = get_stockfish_engine()
+    engine_result = engine.play(board, chess.engine.Limit(time=0.1))
+    engine.quit()
+    return engine_result.move
+
+
 def parse_chess_move(board: chess.Board, move_uci: str) -> chess.Move:
     """ "Use this tool to make a chess move. Input the move in UCI format."""
     try:
