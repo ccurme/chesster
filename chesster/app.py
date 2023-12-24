@@ -16,9 +16,15 @@ html = """
 <html>
     <head>
         <title>Chesster</title>
+        <style>
+            #image {
+                display: none;   /* Hide image initially */
+            }
+        </style>
     </head>
     <body>
         <h1>Chesster</h1>
+        <p id="message">Loading...</p>
         <img id="image" src="" alt="Board will be displayed here"/>
         <ul id='messages'>
         </ul>
@@ -28,8 +34,15 @@ html = """
                 ws.send("Show me the image");
             };
             ws.onmessage = function(event) {
+                var message = document.getElementById('message')
                 var image = document.getElementById('image')
-                image.src = event.data
+                if (event.data.startsWith("Welcome")) {
+                    message.innerText = event.data;
+                } else if (event.data.startsWith("data:image/svg+xml")) {
+                    image.src = event.data
+                    image.style.display = 'block';   /* Show image */
+                    message.style.display = 'none';  /* Hide message */
+                }
             };
         </script>
     </body>
@@ -75,8 +88,9 @@ class BoardManager:
         await websocket.accept()
         self.active_websockets.append(websocket)
         try:
+            welcome_message = "Welcome to Chesster!"
+            await websocket.send_text(welcome_message)
             while True:
-                await self.update_board(self.board)
                 data = await websocket.receive_text()
                 if data == "Show me the image" and self.last_updated_image is not None:
                     await websocket.send_text(self.last_updated_image)
@@ -107,6 +121,7 @@ async def set_player_side(color: str) -> dict:
 
 @app.get("/initialize_game_vs_opponent/{player_side_str}")
 async def initialize_game_vs_opponent(player_side_str: str) -> dict:
+    """Start new game."""
     await board_manager.set_board(chess.Board())
     _ = await set_player_side(player_side_str)
     if board_manager.player_side == chess.BLACK:
