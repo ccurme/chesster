@@ -52,7 +52,7 @@ def _make_mock_llm(*args, **kwargs) -> Runnable:
     "chesster.play_stockfish.chess.Board.is_game_over",
     side_effect=[False, False, False, True],
 )
-@patch("chesster.agent.ChatOpenAI", return_value=_make_mock_llm())
+@patch("chesster.game_agent.ChatOpenAI", return_value=_make_mock_llm())
 def test_play_stockfish(
     mock_llm: Callable, mock_is_game_over: Callable, user_input: Callable
 ):

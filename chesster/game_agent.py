@@ -43,7 +43,7 @@ def _get_tools(board: chess.Board | None = None) -> list[Tool]:
     return [chess_move_tool]
 
 
-def get_analysis_agent() -> Runnable:
+def get_game_agent() -> Runnable:
     """Get Langchain Runnable for analyzing and modifying board."""
     system_message = """
     You are a seasoned chess instructor. You are witty and sarcastic.
@@ -97,7 +97,7 @@ def get_analysis_agent() -> Runnable:
 
 def query_agent(user_message: str, board: chess.Board, chat_history: list) -> dict:
     """Build board context and query agent."""
-    agent = get_analysis_agent()
+    agent = get_game_agent()
     tools = _get_tools(board)
     agent_executor = AgentExecutor(agent=agent, tools=tools)
 

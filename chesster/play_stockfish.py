@@ -5,7 +5,7 @@ import chess.engine
 from IPython.display import clear_output, display
 from langchain_core.messages import AIMessage, HumanMessage
 
-from chesster.agent import query_agent
+from chesster.game_agent import query_agent
 from chesster.utils import display_board, get_stockfish_engine
 
 
