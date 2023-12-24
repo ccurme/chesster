@@ -20,18 +20,23 @@ def _interesting_move_iterator(
     engine = get_stockfish_engine()
     new_board = chess.Board()
     new_board.player_side = board.player_side
+    centipawns = 0
     for move in board.move_stack:
         new_board.push(move)
+        analysis = engine.analyse(new_board, chess.engine.Limit(time=0.1))
+        score = analysis["score"]
+        if board.player_side == chess.WHITE:
+            new_centipawns = score.white().score()
+        else:
+            new_centipawns = score.black().score()
+        if new_centipawns is None:
+            continue
+        delta = new_centipawns - centipawns
         if new_board.turn != board.player_side:  # player just moved
-            analysis = engine.analyse(new_board, chess.engine.Limit(time=0.1))
-            score = analysis["score"]
-            if board.player_side == chess.WHITE:
-                centipawns = score.white().score()
-            else:
-                centipawns = score.black().score()
-            if centipawns is not None and (abs(centipawns) > centipawn_threshold):
+            if (abs(delta) > centipawn_threshold):
                 display_board(new_board)
-                yield {"board": make_system_message(new_board), "last_move_centipawns": centipawns}
+                yield {"board": make_system_message(new_board), "last_move_centipawns": delta}
+        centipawns = new_centipawns
 
 
 def _safe_next(iterator: Iterator) -> Any:
@@ -67,9 +72,8 @@ def get_analysis_agent() -> Runnable:
     have done things differently and help them learn.
 
     At the start of the conversation, always use the get_next_interesting_move function to get
-    the first move.
-
-    Rrespond to the student's follow up queries.
+    the first move. Respond to the student's follow up queries if any before invoking the
+    function again.
 
     Limit your commentary to 100 words or fewer.
     """
