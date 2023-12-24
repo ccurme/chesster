@@ -63,9 +63,12 @@ def display_board(board, player_side: chess.Color) -> None:
     return chess.svg.board(board, flipped=flipped, size=board_size, lastmove=last_move)
 
 
-def serialize_board_state(board: chess.Board) -> str:
+def serialize_board_state(board: chess.Board, player_side: chess.Color) -> str:
     """Serialize board state."""
-    board_picture = str(board)
+    if player_side == chess.BLACK:
+        board_picture = str(board.mirror())
+    else:
+        board_picture = str(board)
     return f"{board_picture}\n\n{chess.Board().variation_san(board.move_stack)}"
 
 
