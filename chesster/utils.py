@@ -1,7 +1,10 @@
+import io
 import os
+from typing import Iterable
 
 import chess
 import chess.engine
+import chess.pgn
 import chess.svg
 from IPython.core.interactiveshell import InteractiveShell
 from IPython.display import display
@@ -21,6 +24,13 @@ def get_stockfish_engine(skill_level: int = 3) -> chess.engine.SimpleEngine:
     engine.configure({"Skill Level": skill_level})
 
     return engine
+
+
+def parse_pgn_into_move_list(game_pgn: str) -> Iterable[chess.Move]:
+    """Parse PGN into list of Move objects."""
+    pgn_fp = io.StringIO(game_pgn)
+    game = chess.pgn.read_game(pgn_fp)
+    return game.mainline_moves()
 
 
 def display_board(board) -> None:

@@ -1,4 +1,5 @@
 from textwrap import dedent
+import time
 from typing import Any, Iterator
 
 import chess
@@ -6,11 +7,18 @@ from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
 from langchain.agents.format_scratchpad import format_to_openai_function_messages
 from langchain_community.chat_models import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.runnables import Runnable
 from langchain.tools import Tool
 from langchain.tools.render import format_tool_to_openai_function
+from IPython.display import clear_output
 
-from chesster.utils import display_board, get_stockfish_engine, make_system_message
+from chesster.utils import (
+    display_board,
+    get_stockfish_engine,
+    make_system_message,
+    parse_pgn_into_move_list,
+)
 
 
 def _interesting_move_iterator(
@@ -47,6 +55,32 @@ def _safe_next(iterator: Iterator) -> Any:
         return "End of iteration."
 
 
+def _display_scenario(initial_board_state: str, move_sequence: str) -> None:
+    """Display move scenario."""
+    display_board = chess.Board()
+    for move in parse_pgn_into_move_list(initial_board_state):
+        display_board.push(move)
+    scenario_moves = parse_pgn_into_move_list(move_sequence)
+    clear_output()
+    display_board(display_board)
+    for move in scenario_moves:
+        clear_output()
+        time.sleep(3)
+        display_board.push(move)
+        display_board(display_board)
+
+
+class DisplayScenarioInput(BaseModel):
+    initial_board_state: str = Field(
+        ...,
+        description="The SAN string of the current board state, e.g., '1. d4 Nf6 2. Nc3 g6'",
+    )
+    move_sequence: str = Field(
+        ...,
+        description="The SAN string of the move sequence to simulate, e.g., '3. Bf4 Bg7 4. Nb5'",
+    )
+
+
 def _get_tools(board: chess.Board | None = None) -> list[Tool]:
     """Get tools given a board."""
     # N.B. we accept None as a hack to make it easy to generate function definitions
@@ -57,8 +91,14 @@ def _get_tools(board: chess.Board | None = None) -> list[Tool]:
         name="get_next_interesting_move",
         description="Use this tool to identify the next interesting move. Always pass an empty string.",
     )
+    display_scenario_tool = Tool.from_function(
+        func=_display_scenario,
+        name="display_scenario",
+        description="Use this tool to display a scenario.",
+        args_schema=DisplayScenarioInput,
+    )
 
-    return [next_interesting_move_tool]
+    return [next_interesting_move_tool, display_scenario_tool]
 
 
 def get_analysis_agent() -> Runnable:
