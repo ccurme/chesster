@@ -1,4 +1,7 @@
+import os
+
 import chess
+import chess.engine
 import chess.svg
 from IPython.core.interactiveshell import InteractiveShell
 from IPython.display import display
@@ -7,6 +10,17 @@ from IPython.display import display
 def _clean_up_prompt(prompt: str) -> str:
     """Remove leading whitespaces. Like `dedent` but does not require common indentation."""
     return "\n".join(line.lstrip() for line in prompt.splitlines())
+
+
+def get_stockfish_engine(skill_level: int = 3) -> chess.engine.SimpleEngine:
+    """Load Stockfish engine."""
+    engine_path = os.getenv(
+        "STOCKFISH_ENGINE_PATH", "stockfish/stockfish-ubuntu-x86-64-modern"
+    )
+    engine = chess.engine.SimpleEngine.popen_uci(engine_path)
+    engine.configure({"Skill Level": skill_level})
+
+    return engine
 
 
 def display_board(board) -> None:

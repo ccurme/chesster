@@ -1,4 +1,3 @@
-import os
 import time
 
 import chess
@@ -7,23 +6,12 @@ from IPython.display import clear_output, display
 from langchain_core.messages import AIMessage, HumanMessage
 
 from chesster.agent import query_agent
-from chesster.utils import display_board
-
-
-def _get_stockfish_engine(skill_level: int = 3) -> chess.engine.SimpleEngine:
-    """Load Stockfish engine."""
-    engine_path = os.getenv(
-        "STOCKFISH_ENGINE_PATH", "stockfish/stockfish-ubuntu-x86-64-modern"
-    )
-    engine = chess.engine.SimpleEngine.popen_uci(engine_path)
-    engine.configure({"Skill Level": skill_level})
-
-    return engine
+from chesster.utils import display_board, get_stockfish_engine
 
 
 def _get_engine_move(board: chess.Board) -> chess.Move:
     """Get move from engine."""
-    engine = _get_stockfish_engine()
+    engine = get_stockfish_engine()
     engine_result = engine.play(board, chess.engine.Limit(time=0.1))
     engine.quit()
     return engine_result.move
