@@ -33,28 +33,18 @@ def parse_pgn_into_move_list(game_pgn: str) -> Iterable[chess.Move]:
     return game.mainline_moves()
 
 
-def display_board(board) -> None:
+def display_board(board, player_side: chess.Color) -> None:
     """Display board."""
     board_size = 360
-    if board.player_side == chess.WHITE:
+    if player_side == chess.WHITE:
         flipped = False
     else:
         flipped = True
-    if InteractiveShell.initialized():
-        if board.move_stack:
-            last_move = board.move_stack[-1]
-        else:
-            last_move = None
-        display(
-            chess.svg.board(board, flipped=flipped, size=board_size, lastmove=last_move)
-        )
+    if board.move_stack:
+        last_move = board.move_stack[-1]
     else:
-        delimiter = "---------------"
-        print(delimiter)
-        if flipped:
-            print(board.mirror())
-        else:
-            print(board)
+        last_move = None
+    return chess.svg.board(board, flipped=flipped, size=board_size, lastmove=last_move)
 
 
 def serialize_board_state(board: chess.Board) -> str:

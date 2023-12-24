@@ -1,6 +1,12 @@
+import urllib
+
+import chess
+import chess.svg
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from typing import List
+
+from chesster.utils import display_board
 
 app = FastAPI()
 
@@ -29,20 +35,25 @@ html = """
 </html>
 """
 
-class ImageManager:
+class BoardManager:
     def __init__(self):
         self.active_websockets: List[WebSocket] = []
         self.last_updated_image = None
+        self.board = chess.Board()
+        self.player_side = None
         self.global_images = [
             "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Crect width='50' height='50' style='fill:rgb(255,0,0);stroke-width:0;stroke:rgb(0,0,0)' /%3E%3C/svg%3E",
-            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Crect width='50' height='50' style='fill:rgb(0,0,255);stroke-width:0;stroke:rgb(0,0,0)' /%3E%3C/svg%3E"
+            "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 50'%3E%3Crect width='50' height='50' style='fill:rgb(0,0,255);stroke-width:0;stroke:rgb(0,0,0)' /%3E%3C/svg%3E",
+            "data:image/svg+xml," + urllib.parse.quote(str(display_board(self.board, chess.WHITE))),
         ]
 
     async def update_image(self, color: int):
         if color == 1:
             self.last_updated_image = self.global_images[0]
-        else:
+        elif color == 2:
             self.last_updated_image = self.global_images[1]
+        else:
+            self.last_updated_image = self.global_images[2]
 
         for websocket in self.active_websockets:
             await websocket.send_text(self.last_updated_image)
@@ -58,7 +69,7 @@ class ImageManager:
         except WebSocketDisconnect:
             self.active_websockets.remove(websocket)
 
-manager = ImageManager()
+board_manager = BoardManager()
 
 @app.get("/")
 async def get():
@@ -66,8 +77,9 @@ async def get():
 
 @app.get("/update_image/{color}")
 async def update_image(color: int):
-    return await manager.update_image(color)
+    await board_manager.update_image(color)
+    return {"message": "Image updated successfully", "color": color}
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    return await manager.websocket_endpoint(websocket)
+    return await board_manager.websocket_endpoint(websocket)
