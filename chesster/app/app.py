@@ -45,9 +45,13 @@ async def initialize_game_vs_opponent(player_side_str: str) -> dict:
     _ = await set_player_side(player_side_str)
     if board_manager.player_side == chess.BLACK:
         opponent_move = get_engine_move(board_manager.board)
+        opponent_move_san = board_manager.board.san(opponent_move)
         await board_manager.make_move(opponent_move)
+        response = f"Game initialized. Opponent move: {opponent_move_san}."
+    else:
+        response = "Game initialized. Your move."
 
-    return {"message": "Game initialized."}
+    return {"message": response}
 
 
 @app.get("/make_move_vs_opponent/{move_str}")
