@@ -2,8 +2,10 @@ import time
 
 import chess
 import chess.svg
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, Request, WebSocket
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
 from chesster.app.board_manager import BoardManager
 from chesster.app.html import html_string
@@ -17,13 +19,15 @@ from chesster.utils import (
 
 
 app = FastAPI()
+app.mount("/static", StaticFiles(directory="chesster/app/static"), name="static")
+templates = Jinja2Templates(directory="chesster/app/templates")
 
 board_manager = BoardManager()
 
 
-@app.get("/")
-async def get():
-    return HTMLResponse(html_string)
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get("/set_player_side/{color}")
