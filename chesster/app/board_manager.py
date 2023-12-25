@@ -93,6 +93,7 @@ class BoardManager:
                         await websocket.send_text(self.last_updated_image)
                 else:
                     user_message = data
+                    await websocket.send_text(user_message)
                     response_message = await self.remote_runnable.ainvoke(
                         {
                             "user_message": user_message,

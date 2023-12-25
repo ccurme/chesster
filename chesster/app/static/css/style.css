@@ -52,21 +52,30 @@ body {
 #chat-container {
   padding: 20px;
   color: #fff; /* Text color */
+  padding-bottom: 50px;
 }
 
 #chat-messages {
   list-style-type: none;
-  padding: 0;
 }
 
 #chat-form {
-  margin-top: 20px;
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  width: calc(25% - 20px);
+  margin-top: 0;
   display: flex;
   align-items: center;
+  background: rgba(0, 0, 0, 0.5);
 }
 
 #chat-input {
   flex-grow: 1;
   margin-right: 10px;
   padding: 10px;
+  background: transparent;
+  border: 1px solid #fff;
+  border-radius: 4px;
+  color: #fff;
 }

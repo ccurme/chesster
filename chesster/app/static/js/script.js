@@ -103,7 +103,9 @@ chatForm.addEventListener('submit', function(event) {
     event.preventDefault();
     var message = chatInput.value;
     chatInput.value = '';
-    ws.send(message);
+    if (message) {
+        ws.send(message);
+    }
 });
 
 
