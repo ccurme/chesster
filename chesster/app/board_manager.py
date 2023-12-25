@@ -93,19 +93,13 @@ class BoardManager:
                         await websocket.send_text(self.last_updated_image)
                 else:
                     user_message = data
-                    response_message = self.remote_runnable.invoke(
+                    response_message = await self.remote_runnable.ainvoke(
                         {
                             "user_message": user_message,
                             "chat_history": self.chat_history,
                         }
                     )
-                    self.chat_history.extend(
-                        [
-                            HumanMessage(content=user_message),
-                            AIMessage(content=response_message),
-                        ]
-                    )
-                    # import pdb; pdb.set_trace()
+                    self.chat_history.append((user_message, response_message))
                     await websocket.send_text(response_message)
         except WebSocketDisconnect:
             self.active_websockets.remove(websocket)
