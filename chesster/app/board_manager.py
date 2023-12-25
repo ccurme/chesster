@@ -3,6 +3,8 @@ import urllib
 
 import chess
 from fastapi import WebSocket, WebSocketDisconnect
+from langchain.schema import AIMessage, HumanMessage
+from langserve import RemoteRunnable
 
 from chesster.utils import (
     display_board,
@@ -18,6 +20,8 @@ class BoardManager:
         self.board = chess.Board()
         self.player_side = chess.WHITE
         self.interesting_move_iterator = None
+        self.chat_history = []
+        self.remote_runnable = RemoteRunnable("http://localhost:8080/chesster")
 
     async def set_board(self, board: chess.Board) -> None:
         """Set board."""
@@ -84,7 +88,24 @@ class BoardManager:
             await websocket.send_text(welcome_message)
             while True:
                 data = await websocket.receive_text()
-                if data == "Show me the image" and self.last_updated_image is not None:
-                    await websocket.send_text(self.last_updated_image)
+                if data == "Show me the image":
+                    if self.last_updated_image is not None:
+                        await websocket.send_text(self.last_updated_image)
+                else:
+                    user_message = data
+                    response_message = self.remote_runnable.invoke(
+                        {
+                            "user_message": user_message,
+                            "chat_history": self.chat_history,
+                        }
+                    )
+                    self.chat_history.extend(
+                        [
+                            HumanMessage(content=user_message),
+                            AIMessage(content=response_message),
+                        ]
+                    )
+                    # import pdb; pdb.set_trace()
+                    await websocket.send_text(response_message)
         except WebSocketDisconnect:
             self.active_websockets.remove(websocket)
