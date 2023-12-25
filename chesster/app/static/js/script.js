@@ -125,6 +125,8 @@ ws.onmessage = function(event) {
     } else {
         var li = document.createElement('li');
         li.innerText = event.data;
+        // Determine if the message is even or odd and add the appropriate class
+        li.className = chatMessages.childNodes.length % 2 == 0 ? 'message-white' : 'message-teal';
         chatMessages.insertBefore(li, chatMessages.firstChild); // Insert new message at the top
     }
 };
