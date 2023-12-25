@@ -36,13 +36,13 @@ class InitializeGameFromPGNInput(BaseModel):
 
 def _initialize_game(player_side: str) -> dict:
     """Use this tool to make a chess move. Input the move in UCI format."""
-    response = requests.get(f"{SERVER_URL}/initialize_game_vs_opponent/{player_side}")
+    response = requests.post(f"{SERVER_URL}/initialize_game_vs_opponent/{player_side}")
     return response.json()
 
 
 def _make_chess_move(move_uci: str) -> dict:
     """Use this tool to make a chess move. Input the move in UCI format."""
-    response = requests.get(f"{SERVER_URL}/make_move_vs_opponent/{move_uci}")
+    response = requests.post(f"{SERVER_URL}/make_move_vs_opponent/{move_uci}")
     return response.json()
 
 
@@ -51,7 +51,7 @@ def _initialize_game_from_pgn(
 ) -> dict:
     """Use this tool to initialize a previously played game."""
     encoded_pgn_str = urllib.parse.quote(pgn_string)
-    response = requests.get(
+    response = requests.post(
         f"{SERVER_URL}/make_board_from_pgn/{encoded_pgn_str}/{player_side_string}"
     )
     return response.json()
@@ -59,7 +59,7 @@ def _initialize_game_from_pgn(
 
 def _get_next_interesting_move() -> dict:
     """Use this tool to get the next interesting move according to the engine."""
-    response = requests.get(f"{SERVER_URL}/get_next_interesting_move")
+    response = requests.post(f"{SERVER_URL}/get_next_interesting_move")
 
     return response.json()
 

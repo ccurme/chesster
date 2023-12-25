@@ -29,7 +29,7 @@ async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.get("/set_player_side/{color}")
+@app.post("/set_player_side/{color}")
 async def set_player_side(color: str) -> dict:
     """Set side to black or white."""
     if "w" in color:
@@ -42,7 +42,7 @@ async def set_player_side(color: str) -> dict:
     return {"message": f"Updated player side successfully to {side_str}."}
 
 
-@app.get("/initialize_game_vs_opponent/{player_side_str}")
+@app.post("/initialize_game_vs_opponent/{player_side_str}")
 async def initialize_game_vs_opponent(player_side_str: str) -> dict:
     """Start new game."""
     await board_manager.set_board(chess.Board())
@@ -58,7 +58,7 @@ async def initialize_game_vs_opponent(player_side_str: str) -> dict:
     return {"message": response}
 
 
-@app.get("/make_move_vs_opponent/{move_str}")
+@app.post("/make_move_vs_opponent/{move_str}")
 async def make_move_vs_opponent(move_str: str) -> dict:
     """Push move to board against engine. Move should be a valid UCI string."""
     if board_manager.board.is_game_over():
@@ -78,7 +78,7 @@ async def make_move_vs_opponent(move_str: str) -> dict:
     return {"message": response}
 
 
-@app.get("/make_board_from_pgn/{pgn_str}/{player_side_str}")
+@app.post("/make_board_from_pgn/{pgn_str}/{player_side_str}")
 async def make_board_from_pgn(pgn_str: str, player_side_str: str) -> dict:
     """Initialize board from PGN string."""
     move_stack = parse_pgn_into_move_list(pgn_str)
@@ -94,7 +94,7 @@ async def make_board_from_pgn(pgn_str: str, player_side_str: str) -> dict:
     return {"message": response}
 
 
-@app.get("/get_next_interesting_move/")
+@app.post("/get_next_interesting_move/")
 async def get_next_interesting_move() -> dict:
     result = await safe_next(board_manager.interesting_move_iterator)
     return {"result": result}
