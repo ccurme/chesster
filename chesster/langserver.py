@@ -20,7 +20,10 @@ class AgentInput(BaseModel):
 
 tools = get_tools()
 agent = get_agent()
-agent_executor = AgentExecutor(agent=agent, tools=tools).with_types(input_type=AgentInput)
+agent_executor = (
+    AgentExecutor(agent=agent, tools=tools).with_types(input_type=AgentInput)
+    | (lambda x: x["output"])
+)
 
 add_routes(
     app,
