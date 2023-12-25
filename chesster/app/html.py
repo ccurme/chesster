@@ -5,8 +5,9 @@ html_string = """
         <title>Chesster</title>
         <style>
             body {
-                background-color: #333333; /* Dark charcoal grey */
+                background-color: #333333;
                 color: #ffffff; /* Text color */
+                font-family: 'Courier New', Courier, monospace;
             }
             #image {
                 display: none;   /* Hide image initially */

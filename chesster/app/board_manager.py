@@ -4,7 +4,12 @@ import urllib
 import chess
 from fastapi import WebSocket, WebSocketDisconnect
 
-from chesster.utils import display_board, get_stockfish_engine, serialize_board_state
+from chesster.utils import (
+    display_board,
+    get_stockfish_engine,
+    serialize_board_state,
+    serialize_board_state_with_last_move,
+)
 
 
 class BoardManager:
@@ -60,7 +65,7 @@ class BoardManager:
             if new_board.turn != self.player_side:  # player just moved
                 if (abs(delta) > centipawn_threshold):
                     await self.update_board(new_board)
-                    yield {"board": serialize_board_state(new_board, self.player_side), "last_move_centipawns": delta}
+                    yield {"board": serialize_board_state_with_last_move(new_board, self.player_side), "last_move_centipawns": delta}
             centipawns = new_centipawns
 
 
