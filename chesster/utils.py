@@ -1,6 +1,6 @@
 import io
 import os
-from typing import Iterable
+from typing import Any, Iterable, Iterator
 
 import chess
 import chess.engine
@@ -13,6 +13,14 @@ from IPython.display import display
 def _clean_up_prompt(prompt: str) -> str:
     """Remove leading whitespaces. Like `dedent` but does not require common indentation."""
     return "\n".join(line.lstrip() for line in prompt.splitlines())
+
+
+def safe_next(iterator: Iterator) -> Any:
+    """Next but catch StopIteration and return a message."""
+    try:
+        return anext(iterator)
+    except StopIteration:
+        return "End of iteration."
 
 
 def get_stockfish_engine(skill_level: int = 3) -> chess.engine.SimpleEngine:

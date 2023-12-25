@@ -11,6 +11,7 @@ from chesster.utils import (
     get_engine_move,
     parse_chess_move,
     parse_pgn_into_move_list,
+    safe_next,
     serialize_board_state,
 )
 
@@ -82,11 +83,18 @@ async def make_board_from_pgn(pgn_str: str, player_side_str: str) -> dict:
     _ = await set_player_side(player_side_str)
     for move in move_stack:
         await board_manager.make_move(move)
+    await board_manager.set_interesting_move_iterator()
     response = (
         "Successfully uploaded board. Board state:\n"
         f"{serialize_board_state(board_manager.board, board_manager.player_side)}"
     )
     return {"message": response}
+
+
+@app.get("/get_next_interesting_move/")
+async def get_next_interesting_move() -> dict:
+    result = await safe_next(board_manager.interesting_move_iterator)
+    return {"result": result}
 
 
 @app.websocket("/ws")

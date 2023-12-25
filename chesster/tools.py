@@ -34,6 +34,13 @@ class LoadGameInput(BaseModel):
     )
 
 
+# class NextInterestingMoveInput(BaseModel):
+#     blank_string: str = Field(
+#         ...,
+#         description="Placeholder argument.",
+#     )
+
+
 def _initialize_game(player_side: str) -> dict:
     """Use this tool to make a chess move. Input the move in UCI format."""
     response = requests.get(f"{SERVER_URL}/initialize_game_vs_opponent/{player_side}")
@@ -52,6 +59,13 @@ def _load_game_from_pgn(pgn_string: str = "", player_side_string: str = "white")
     response = requests.get(
         f"{SERVER_URL}/make_board_from_pgn/{encoded_pgn_str}/{player_side_string}"
     )
+    return response.json()
+
+
+def _get_next_interesting_move(*args) -> dict:
+    """Use this tool to get the next interesting move according to the engine."""
+    response = requests.get(f"{SERVER_URL}/get_next_interesting_move")
+
     return response.json()
 
 
@@ -75,5 +89,11 @@ def get_tools() -> list[Tool]:
         description="Use this tool to load a game from a PGN string. Input the string as provided.",
         args_schema=LoadGameInput,
     )
+    next_interesting_move_tool = Tool.from_function(
+        func=_get_next_interesting_move,
+        name="get_next_interesting_move",
+        description="Use this tool to identify the next interesting move. Always pass an empty string.",
+        # args_schema=NextInterestingMoveInput,
+    )
 
-    return [initialize_game_tool, chess_move_tool, load_game_tool]
+    return [initialize_game_tool, chess_move_tool, load_game_tool, next_interesting_move_tool]

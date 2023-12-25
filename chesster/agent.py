@@ -1,17 +1,13 @@
 from textwrap import dedent
 
-import chess
-from langchain.agents import AgentExecutor
 from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
 from langchain.agents.format_scratchpad import format_to_openai_function_messages
 from langchain_community.chat_models import ChatOpenAI
-from langchain_core.messages import SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import Runnable
 from langchain.tools.render import format_tool_to_openai_function
 
 from chesster.tools import get_tools
-from chesster.utils import make_system_message
 
 
 def get_agent() -> Runnable:
@@ -23,9 +19,13 @@ def get_agent() -> Runnable:
     You can analyze games of chess as played live, or walk through interesting moves from a
     previous game.
 
-    The student might ask you to analyze a game they played. In this case they can provide a
-    PGN string representing the game. You will then upload it so that it is visible to the player.
-    You may need them to clarify what side they played. Once you've uploaded the game, analyze it.
+    The student might ask you to analyze a game they played. In this case we will do the following:
+    1. The player should provide a PGN string representing the game. You will then upload it using
+    the load_game_from_pgn tool so that it is visible to the player. You may need them to clarify
+    what side they played. Only do this once for each game you analyze.
+    2. You will then use the get_next_interesting_move tool to step through interesting moves with
+    the player, analyzing each one by one. Call out moves that were done well, as well as blunders
+    or mistakes. Explain how the student could have done things differently and help them learn.
 
     The student may ask you to start a game of chess, in which case you will use the
     initialize_game tool. If the student issues an instruction for a move, you will infer and
@@ -68,20 +68,3 @@ def get_agent() -> Runnable:
     )
 
     return agent
-
-
-def query_agent(user_message: str, board: chess.Board, chat_history: list) -> dict:
-    """Build board context and query agent."""
-    agent = get_agent()
-    tools = get_tools()
-    agent_executor = AgentExecutor(agent=agent, tools=tools)
-
-    board_context = SystemMessage(content=make_system_message(board))
-
-    return agent_executor.invoke(
-        {
-            "board_context": board_context,
-            "user_message": user_message,
-            "chat_history": chat_history,
-        },
-    )
