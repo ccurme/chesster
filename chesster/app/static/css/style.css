@@ -48,3 +48,25 @@ body {
   background: #ff4444;
   box-shadow: 0 0 15px #ff4444;
 }
+
+#chat-container {
+  padding: 20px;
+  color: #fff; /* Text color */
+}
+
+#chat-messages {
+  list-style-type: none;
+  padding: 0;
+}
+
+#chat-form {
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+}
+
+#chat-input {
+  flex-grow: 1;
+  margin-right: 10px;
+  padding: 10px;
+}

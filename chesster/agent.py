@@ -51,6 +51,7 @@ def get_agent() -> Runnable:
         ]
     )
 
+    # TODO: enable streaming: https://python.langchain.com/docs/modules/agents/how_to/streaming
     llm = ChatOpenAI(model="gpt-4-1106-preview", temperature=0)
     llm_with_tools = llm.bind(
         functions=[format_tool_to_openai_function(tool) for tool in tools]

@@ -95,6 +95,18 @@ function animateStars(starFieldWidth, speed) {
     }, 20);
 }
 
+var chatForm = document.getElementById('chat-form');
+var chatInput = document.getElementById('chat-input');
+var chatMessages = document.getElementById('chat-messages');
+
+chatForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    var message = chatInput.value;
+    chatInput.value = '';
+    ws.send(message);
+});
+
+
 var ws = new WebSocket("ws://localhost:8000/ws");
 ws.onopen = function(event) {
     ws.send("Show me the image");
@@ -102,11 +114,15 @@ ws.onopen = function(event) {
 ws.onmessage = function(event) {
     var message = document.getElementById('message')
     var image = document.getElementById('image')
-    if (event.data.startsWith("Welcome")) {
+    if (event.data.startsWith("Welcome")) {  /* TODO: fix this hack */
         message.innerText = event.data;
     } else if (event.data.startsWith("data:image/svg+xml")) {
         image.src = event.data
         image.style.display = 'block';   /* Show image */
         message.style.display = 'none';  /* Hide message */
+    } else {
+        var li = document.createElement('li');
+        li.innerText = event.data;
+        chatMessages.appendChild(li);
     }
 };
