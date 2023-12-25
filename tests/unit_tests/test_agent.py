@@ -1,16 +1,30 @@
 from unittest.mock import MagicMock, patch
-from typing import Callable
 
-from langchain_core.messages import AIMessage
+from fastapi.testclient import TestClient
+from langchain.agents import AgentExecutor
+from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.runnables import Runnable
 
-from chesster import play_stockfish
+from chesster import agent
+from chesster.app.app import app
+
+client = TestClient(app)
 
 
 def _make_mock_llm(*args, **kwargs) -> Runnable:
     """Make mock llm for testing."""
     llm = MagicMock(spec=Runnable)
     llm.invoke.side_effect = [
+        AIMessage(
+            content="",
+            additional_kwargs={
+                "function_call": {
+                    "arguments": '{"player_side":"white"}',
+                    "name": "initialize_game",
+                }
+            },
+        ),
+        AIMessage(content="OK, your move."),
         AIMessage(
             content="",
             additional_kwargs={
@@ -35,26 +49,80 @@ def _make_mock_llm(*args, **kwargs) -> Runnable:
             content="",
             additional_kwargs={
                 "function_call": {
-                    "arguments": '{"move":"c1f4"}',
-                    "name": "make_chess_move",
+                    "arguments": '{"player_side":"black"}',
+                    "name": "initialize_game",
                 }
             },
         ),
-        AIMessage(content=""),
+        AIMessage(content="OK, white just played e4. Your move."),
+        AIMessage(content="Try to control the center."),
+        AIMessage(
+            content="",
+            additional_kwargs={
+                "function_call": {
+                    "arguments": (
+                        '{"pgn_string":"d4 Nf6 2. Nc3 g6 3. Bf4 Bg7 '
+                        '4. Nb5 d6","player_side_string":"black"}'
+                    ),
+                    "name": "initialize_game_from_pgn",
+                }
+            },
+        ),
+        AIMessage(content=("I have uploaded the game, shall we walk through it?")),
+        AIMessage(
+            content="",
+            additional_kwargs={
+                "function_call": {
+                    "arguments": "{}",
+                    "name": "_get_next_interesting_move",
+                }
+            },
+        ),
+        AIMessage(content="This move was terrible."),
     ]
     llm.bind = lambda *args, **kwargs: llm
 
     return llm
 
 
-@patch("chesster.play_stockfish.input", side_effect=["w", "d4", "Nc3", "c1f4"])
-@patch(
-    "chesster.play_stockfish.chess.Board.is_game_over",
-    side_effect=[False, False, False, True],
-)
-@patch("chesster.game_agent.ChatOpenAI", return_value=_make_mock_llm())
-def test_play_stockfish(
-    mock_llm: Callable, mock_is_game_over: Callable, user_input: Callable
-):
-    board = play_stockfish.main()
-    assert 6 == len(board.move_stack)
+@patch("requests.post")
+@patch("chesster.agent.ChatOpenAI", return_value=_make_mock_llm())
+def test_agent(mock_llm, mock_post):
+
+    tools = agent.get_tools()
+    agent_runnable = agent.get_agent()
+    agent_executor = AgentExecutor(agent=agent_runnable, tools=tools)
+    chat_history = []
+
+    mock_post.return_value.json.return_value = {"message": "Successfully used tool."}
+    mock_post.return_value.status_code = 200
+
+    inputs_and_responses = [
+        ("let's play a game", "OK, your move."),
+        ("d4", "Solid opening."),
+        ("Nc3", ""),
+        ("actually let me play as black", "OK, white just played e4. Your move."),
+        ("what should I think about here?", "Try to control the center."),
+        (
+            (
+                "can you analyze this game? I played white: "
+                "d4 Nf6 2. Nc3 g6 3. Bf4 Bg7 4. Nb5 d6"
+            ),
+            "I have uploaded the game, shall we walk through it?",
+        ),
+        ("go ahead", "This move was terrible."),
+    ]
+    for user_message, expected_response in inputs_and_responses:
+        response = agent_executor.invoke(
+            {
+                "user_message": user_message,
+                "chat_history": chat_history,
+            }
+        )
+        chat_history.extend(
+            [
+                HumanMessage(content=user_message),
+                AIMessage(content=response["output"]),
+            ]
+        )
+        assert response["output"] == expected_response
