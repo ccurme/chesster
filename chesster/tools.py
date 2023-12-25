@@ -23,7 +23,7 @@ class ChessMoveInput(BaseModel):
     )
 
 
-class LoadGameInput(BaseModel):
+class InitializeGameFromPGNInput(BaseModel):
     pgn_string: str = Field(
         ...,
         description="The PGN string of the game, e.g., '1. d4 Nf6 2. Nc3 g6'",
@@ -32,13 +32,6 @@ class LoadGameInput(BaseModel):
         ...,
         description="The player's side of choice, either 'black' or 'white'",
     )
-
-
-# class NextInterestingMoveInput(BaseModel):
-#     blank_string: str = Field(
-#         ...,
-#         description="Placeholder argument.",
-#     )
 
 
 def _initialize_game(player_side: str) -> dict:
@@ -53,8 +46,8 @@ def _make_chess_move(move_uci: str) -> dict:
     return response.json()
 
 
-def _load_game_from_pgn(pgn_string: str = "", player_side_string: str = "white") -> dict:
-    """Use this tool to load a previously played game."""
+def _initialize_game_from_pgn(pgn_string: str = "", player_side_string: str = "white") -> dict:
+    """Use this tool to initialize a previously played game."""
     encoded_pgn_str = urllib.parse.quote(pgn_string)
     response = requests.get(
         f"{SERVER_URL}/make_board_from_pgn/{encoded_pgn_str}/{player_side_string}"
@@ -62,7 +55,7 @@ def _load_game_from_pgn(pgn_string: str = "", player_side_string: str = "white")
     return response.json()
 
 
-def _get_next_interesting_move(*args) -> dict:
+def _get_next_interesting_move() -> dict:
     """Use this tool to get the next interesting move according to the engine."""
     response = requests.get(f"{SERVER_URL}/get_next_interesting_move")
 
@@ -83,17 +76,21 @@ def get_tools() -> list[Tool]:
         description="Use this tool to make a chess move. Input the move in UCI format.",
         args_schema=ChessMoveInput,
     )
-    load_game_tool = StructuredTool.from_function(
-        func=_load_game_from_pgn,
-        name="load_game_from_pgn",
-        description="Use this tool to load a game from a PGN string. Input the string as provided.",
-        args_schema=LoadGameInput,
+    initialize_game_from_pgn_tool = StructuredTool.from_function(
+        func=_initialize_game_from_pgn,
+        name="initialize_game_from_pgn",
+        description="Use this tool to initialize a game from a PGN string. Input the string as provided.",
+        args_schema=InitializeGameFromPGNInput,
     )
-    next_interesting_move_tool = Tool.from_function(
+    next_interesting_move_tool = StructuredTool.from_function(
         func=_get_next_interesting_move,
         name="get_next_interesting_move",
-        description="Use this tool to identify the next interesting move. Always pass an empty string.",
-        # args_schema=NextInterestingMoveInput,
+        description="Use this tool to identify the next interesting move.",
     )
 
-    return [initialize_game_tool, chess_move_tool, load_game_tool, next_interesting_move_tool]
+    return [
+        initialize_game_tool,
+        chess_move_tool,
+        initialize_game_from_pgn_tool,
+        next_interesting_move_tool,
+    ]

@@ -4,6 +4,10 @@ html_string = """
     <head>
         <title>Chesster</title>
         <style>
+            body {
+                background-color: #333333; /* Dark charcoal grey */
+                color: #ffffff; /* Text color */
+            }
             #image {
                 display: none;   /* Hide image initially */
             }
