@@ -125,6 +125,6 @@ ws.onmessage = function(event) {
     } else {
         var li = document.createElement('li');
         li.innerText = event.data;
-        chatMessages.appendChild(li);
+        chatMessages.insertBefore(li, chatMessages.firstChild); // Insert new message at the top
     }
 };
