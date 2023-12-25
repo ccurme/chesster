@@ -6,8 +6,6 @@ import chess
 import chess.engine
 import chess.pgn
 import chess.svg
-from IPython.core.interactiveshell import InteractiveShell
-from IPython.display import display
 
 
 def _clean_up_prompt(prompt: str) -> str:
@@ -43,7 +41,7 @@ def get_engine_move(board: chess.Board) -> chess.Move:
 
 
 def parse_chess_move(board: chess.Board, move_uci: str) -> chess.Move:
-    """ "Use this tool to make a chess move. Input the move in UCI format."""
+    """Parse chess move from UCI format."""
     try:
         return chess.Move.from_uci(move_uci)
     except chess.InvalidMoveError:

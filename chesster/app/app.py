@@ -8,7 +8,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from chesster.app.board_manager import BoardManager
-from chesster.app.html import html_string
 from chesster.utils import (
     get_engine_move,
     parse_chess_move,
