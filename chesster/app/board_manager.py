@@ -42,12 +42,13 @@ class BoardManager:
         self, centipawn_threshold: int = 100
     ) -> Iterator[chess.Board]:
         """Make iterator over interesting moves according to Chess engine."""
-        engine = get_stockfish_engine()
         new_board = chess.Board()
         centipawns = 0
         for move in self.board.move_stack:
             new_board.push(move)
+            engine = get_stockfish_engine()
             analysis = engine.analyse(new_board, chess.engine.Limit(time=0.1))
+            engine.quit()
             score = analysis["score"]
             if self.player_side == chess.WHITE:
                 new_centipawns = score.white().score()

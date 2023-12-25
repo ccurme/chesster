@@ -1,4 +1,5 @@
 import time
+from typing import Any, AsyncIterator
 
 import chess
 import chess.svg
@@ -12,7 +13,6 @@ from chesster.utils import (
     get_engine_move,
     parse_chess_move,
     parse_pgn_into_move_list,
-    safe_next,
     serialize_board_state,
 )
 
@@ -26,7 +26,7 @@ board_manager = BoardManager()
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 
 @app.post("/set_player_side/{color}")
@@ -94,9 +94,17 @@ async def make_board_from_pgn(pgn_str: str, player_side_str: str) -> dict:
     return {"message": response}
 
 
+async def _safe_next(iterator: AsyncIterator) -> Any:
+    """Next but catch StopIteration and return a message."""
+    try:
+        return await anext(iterator)
+    except StopAsyncIteration:
+        return {"result": "End of iteration."}
+
+
 @app.post("/get_next_interesting_move/")
 async def get_next_interesting_move() -> dict:
-    result = await safe_next(board_manager.interesting_move_iterator)
+    result = await _safe_next(board_manager.interesting_move_iterator)
     return {"result": result}
 
 
