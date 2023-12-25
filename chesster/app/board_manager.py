@@ -7,7 +7,6 @@ from fastapi import WebSocket, WebSocketDisconnect
 from chesster.utils import (
     display_board,
     get_stockfish_engine,
-    serialize_board_state,
     serialize_board_state_with_last_move,
 )
 
