@@ -88,7 +88,9 @@ def serialize_player_side(player_side: chess.Color) -> str:
         return "black"
 
 
-def serialize_board_state_with_last_move(board: chess.Board, player_side: chess.Color) -> str:
+def serialize_board_state_with_last_move(
+    board: chess.Board, player_side: chess.Color
+) -> str:
     """Make message capturing board state."""
     board_state_str = f"""
         Player is playing as {serialize_player_side(player_side)}.

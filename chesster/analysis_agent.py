@@ -22,7 +22,8 @@ from chesster.utils import (
 
 
 def _interesting_move_iterator(
-    board: chess.Board, centipawn_threshold : int = 100,
+    board: chess.Board,
+    centipawn_threshold: int = 100,
 ) -> Iterator[chess.Board]:
     """Make iterator over interesting moves according to Chess engine."""
     engine = get_stockfish_engine()
@@ -41,9 +42,12 @@ def _interesting_move_iterator(
             continue
         delta = new_centipawns - centipawns
         if new_board.turn != board.player_side:  # player just moved
-            if (abs(delta) > centipawn_threshold):
+            if abs(delta) > centipawn_threshold:
                 display_board(new_board)
-                yield {"board": make_system_message(new_board), "last_move_centipawns": delta}
+                yield {
+                    "board": make_system_message(new_board),
+                    "last_move_centipawns": delta,
+                }
         centipawns = new_centipawns
 
 

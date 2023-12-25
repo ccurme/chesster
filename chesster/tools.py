@@ -46,7 +46,9 @@ def _make_chess_move(move_uci: str) -> dict:
     return response.json()
 
 
-def _initialize_game_from_pgn(pgn_string: str = "", player_side_string: str = "white") -> dict:
+def _initialize_game_from_pgn(
+    pgn_string: str = "", player_side_string: str = "white"
+) -> dict:
     """Use this tool to initialize a previously played game."""
     encoded_pgn_str = urllib.parse.quote(pgn_string)
     response = requests.get(

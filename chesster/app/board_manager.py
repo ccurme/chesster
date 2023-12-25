@@ -20,33 +20,28 @@ class BoardManager:
         self.player_side = chess.WHITE
         self.interesting_move_iterator = None
 
-
     async def set_board(self, board: chess.Board) -> None:
         """Set board."""
         self.board = board
         await self.update_board(self.board)
-
 
     async def set_player_side(self, player_side: chess.Color) -> None:
         """Set player side."""
         self.player_side = player_side
         await self.update_board(self.board)
 
-
     async def set_interesting_move_iterator(self) -> None:
         """Calculate interesting moves in board's move stack."""
         self.interesting_move_iterator = self._interesting_move_iterator()
-
 
     async def make_move(self, move: chess.Move) -> None:
         """Parse move and update board."""
         self.board.push(move)
         await self.update_board(self.board)
 
-
     async def _interesting_move_iterator(
-            self, centipawn_threshold : int = 100
-        ) -> Iterator[chess.Board]:
+        self, centipawn_threshold: int = 100
+    ) -> Iterator[chess.Board]:
         """Make iterator over interesting moves according to Chess engine."""
         engine = get_stockfish_engine()
         new_board = chess.Board()
@@ -63,11 +58,15 @@ class BoardManager:
                 continue
             delta = new_centipawns - centipawns
             if new_board.turn != self.player_side:  # player just moved
-                if (abs(delta) > centipawn_threshold):
+                if abs(delta) > centipawn_threshold:
                     await self.update_board(new_board)
-                    yield {"board": serialize_board_state_with_last_move(new_board, self.player_side), "last_move_centipawns": delta}
+                    yield {
+                        "board": serialize_board_state_with_last_move(
+                            new_board, self.player_side
+                        ),
+                        "last_move_centipawns": delta,
+                    }
             centipawns = new_centipawns
-
 
     async def update_board(self, board: chess.Board) -> None:
         """Update SVG string."""
@@ -76,7 +75,6 @@ class BoardManager:
         self.last_updated_image = svg_string
         for websocket in self.active_websockets:
             await websocket.send_text(self.last_updated_image)
-
 
     async def websocket_endpoint(self, websocket: WebSocket):
         await websocket.accept()
