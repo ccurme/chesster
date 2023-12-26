@@ -8,9 +8,12 @@ from langserve import RemoteRunnable
 
 from chesster.utils import (
     display_board,
-    get_stockfish_engine,
+    get_engine_score,
     serialize_board_state_with_last_move,
 )
+
+
+CHAT_HISTORY_LENGTH = 50  # Number of most recent (human, ai) exchanges to retain.
 
 
 class BoardManager:
@@ -50,14 +53,7 @@ class BoardManager:
         centipawns = 0
         for move in self.board.move_stack:
             new_board.push(move)
-            engine = get_stockfish_engine()
-            analysis = engine.analyse(new_board, chess.engine.Limit(time=0.1))
-            engine.quit()
-            score = analysis["score"]
-            if self.player_side == chess.WHITE:
-                new_centipawns = score.white().score()
-            else:
-                new_centipawns = score.black().score()
+            new_centipawns = get_engine_score(new_board, self.player_side)
             if new_centipawns is None:
                 continue
             delta = new_centipawns - centipawns
@@ -101,6 +97,7 @@ class BoardManager:
                         }
                     )
                     self.chat_history.append((user_message, response_message))
+                    self.chat_history = self.chat_history[-CHAT_HISTORY_LENGTH:]
                     await websocket.send_text(response_message)
         except WebSocketDisconnect:
             self.active_websockets.remove(websocket)

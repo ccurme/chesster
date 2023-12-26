@@ -32,6 +32,18 @@ def get_engine_move(board: chess.Board) -> chess.Move:
     return engine_result.move
 
 
+def get_engine_score(board: chess.Board, player_side: chess.Color) -> int:
+    """Get board score in centipawns."""
+    engine = get_stockfish_engine()
+    analysis = engine.analyse(board, chess.engine.Limit(time=0.1))
+    engine.quit()
+    score = analysis["score"]
+    if player_side == chess.WHITE:
+        return score.white().score()
+    else:
+        return score.black().score()
+
+
 def parse_chess_move(board: chess.Board, move_uci: str) -> chess.Move:
     """Parse chess move from UCI format."""
     try:
