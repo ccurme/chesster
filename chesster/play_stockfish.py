@@ -1,4 +1,6 @@
+import json
 import os
+import time
 
 import chess
 import chess.engine
@@ -7,19 +9,6 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from chesster.chain import get_analysis_chain
 from chesster.utils import display_board, make_system_message
-
-
-def _get_user_move(board: chess.Board) -> chess.Move:
-    """Get move from user input."""
-    user_move_uci = input()
-
-    user_move = chess.Move.from_uci(user_move_uci)
-    if not board.is_legal(user_move):
-        display("Illegal move, try again.")
-        user_move_uci = input()
-        user_move = chess.Move.from_uci(user_move_uci)
-
-    return user_move
 
 
 def _get_stockfish_engine(skill_level: int = 3) -> chess.engine.SimpleEngine:
@@ -66,31 +55,37 @@ def main() -> chess.Board:
 
     while not board.is_game_over():
         display_board(board, player_side=player_side)
-        user_move = _get_user_move(board)
-        user_move_san = board.san(user_move)
-        board.push(user_move)
-
-        clear_output()
-        display_board(board, player_side=player_side)
-
+        user_message = input()
         context = SystemMessage(content=make_system_message(board, player_side))
-        user_message = f"I just played {user_move_san}. How's that look?"
-
-        commentary = chain.invoke(
+        response_str = chain.invoke(
             {
                 "board_context": context,
                 "user_message": user_message,
                 "chat_history": chat_history,
             }
         )
+        response = json.loads(response_str)
+        commentary = response["commentary"]
         chat_history.extend(
             [
                 HumanMessage(content=user_message),
                 AIMessage(content=commentary),
             ]
         )
-        engine_move = _get_engine_move(board)
-        board.push(engine_move)
+        user_move_uci = response["move"]
+        if user_move_uci:
+            try:
+                user_move = chess.Move.from_uci(user_move_uci)
+            except chess.InvalidMoveError:
+                user_move = board.parse_san(user_move_uci)  # LLM sometimes outputs SAN
+            board.push(user_move)
+
+            clear_output()
+            display_board(board, player_side=player_side)
+
+            engine_move = _get_engine_move(board)
+            time.sleep(0.5)
+            board.push(engine_move)
         clear_output()
         display(commentary)
 
