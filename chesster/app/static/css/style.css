@@ -107,3 +107,7 @@ body {
   max-width: 80%;
   margin-left: auto;
 }
+
+.transparent {
+  transition: opacity 0.5s ease-in-out;
+}
