@@ -1,3 +1,4 @@
+// Star effect from https://codepen.io/JulieY/pen/GEGdWP
 var starsInterval = null;
 (function () {
     var starFieldWidth = window.innerWidth;
