@@ -1,9 +1,12 @@
-from textwrap import dedent
-
 import chess
 import chess.svg
 from IPython.core.interactiveshell import InteractiveShell
 from IPython.display import display
+
+
+def _clean_up_prompt(prompt: str) -> str:
+    """Remove leading whitespaces. Like `dedent` but does not require common indentation."""
+    return "\n".join(line.lstrip() for line in prompt.splitlines())
 
 
 def display_board(board: chess.Board, player_side: chess.Color = chess.WHITE) -> None:
@@ -32,8 +35,8 @@ def display_board(board: chess.Board, player_side: chess.Color = chess.WHITE) ->
 
 def serialize_board_state(board: chess.Board) -> str:
     """Serialize board state."""
-
-    return chess.Board().variation_san(board.move_stack)
+    board_picture = str(board)
+    return f"{board_picture}\n\n{chess.Board().variation_san(board.move_stack)}"
 
 
 def serialize_player_side(player_side: chess.Color) -> str:
@@ -65,7 +68,7 @@ def make_system_message(board: chess.Board, player_side: chess.Color) -> str:
         """
     else:
         previous_move_str = "No moves yet."
-    return dedent(
+    return _clean_up_prompt(
         f"""
         {board_state_str}
 
