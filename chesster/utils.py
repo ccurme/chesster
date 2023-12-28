@@ -9,10 +9,10 @@ def _clean_up_prompt(prompt: str) -> str:
     return "\n".join(line.lstrip() for line in prompt.splitlines())
 
 
-def display_board(board: chess.Board, player_side: chess.Color = chess.WHITE) -> None:
+def display_board(board) -> None:
     """Display board."""
     board_size = 360
-    if player_side == chess.WHITE:
+    if board.player_side == chess.WHITE:
         flipped = False
     else:
         flipped = True
@@ -47,10 +47,10 @@ def serialize_player_side(player_side: chess.Color) -> str:
         return "black"
 
 
-def make_system_message(board: chess.Board, player_side: chess.Color) -> str:
+def make_system_message(board: chess.Board) -> str:
     """Make message capturing board state."""
     board_state_str = f"""
-        Player is playing as {serialize_player_side(player_side)}.
+        Player is playing as {serialize_player_side(board.player_side)}.
 
         Current board state:
         {serialize_board_state(board)}
@@ -59,7 +59,7 @@ def make_system_message(board: chess.Board, player_side: chess.Color) -> str:
         last_move = board.pop()
         last_move_san = board.san(last_move)
         board.push(last_move)
-        if board.turn == player_side:
+        if board.turn == board.player_side:
             last_to_move = "Opponent"
         else:
             last_to_move = "Player"
