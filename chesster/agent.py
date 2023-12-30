@@ -1,60 +1,39 @@
-from functools import partial
 from textwrap import dedent
 
-import chess
-from langchain.agents import AgentExecutor
 from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
 from langchain.agents.format_scratchpad import format_to_openai_function_messages
 from langchain_community.chat_models import ChatOpenAI
-from langchain_core.messages import SystemMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.runnables import Runnable
-from langchain.tools import Tool
 from langchain.tools.render import format_tool_to_openai_function
 
-from chesster.utils import make_system_message
+from chesster.tools import get_tools
 
 
-class ChessMoveInput(BaseModel):
-    move: str = Field()
-
-
-def _make_chess_move(board: chess.Board, move_uci: str) -> None:
-    """ "Use this tool to make a chess move. Input the move in UCI format."""
-    try:
-        move = chess.Move.from_uci(move_uci)
-    except chess.InvalidMoveError:
-        move = board.parse_san(move_uci)  # LLM sometimes outputs SAN
-    board.push(move)
-
-
-def _get_tools(board: chess.Board | None = None) -> list[Tool]:
-    """Get tools given a board."""
-    # N.B. we accept None as a hack to make it easy to generate function definitions
-    # without a board.
-    chess_move_tool = Tool.from_function(
-        func=partial(_make_chess_move, board),
-        name="make_chess_move",
-        description="Use this tool to make a chess move. Input the move in UCI format.",
-        args_schema=ChessMoveInput,
-    )
-
-    return [chess_move_tool]
-
-
-def get_analysis_agent() -> Runnable:
+def get_agent() -> Runnable:
     """Get Langchain Runnable for analyzing and modifying board."""
     system_message = """
-    You are a seasoned chess instructor. You are witty and sarcastic.
-    You are analyzing a student's game. Help them learn chess and have a good time.
+    You are a seasoned chess instructor. You are interacting with a student. Help them learn chess
+    and have a good time.
 
-    The student will either issue an instruction for a move, or make a query that asks a question
-    or continues the conversation.
+    You can analyze games of chess as played live, or walk through interesting moves from a
+    previous game.
 
-    If the student issues an instruction for a move, you will infer and provide the legal move
-    in UCI notation. For instance, "Move my king's pawn up two" corresponds to "e2e4".
+    The student might ask you to start an analysis of a game they played, in which case you will
+    use the initialize_game_from_pgn tool. The student should clarify what side they played. Only
+    use this tool if you are initializing a new analysis. Once you have used the tool, respond with
+    "I have uploaded the game, shall we walk through moves you played that were interesting?"
 
+    When the student asks to move on or go to the next move, use the get_next_interesting_move tool
+    to get the next interesting move and analyze it. Call out moves that were done well, as well as
+    blunders or mistakes. Explain how the student could have done things differently and help them
+    learn.
+
+    The student may ask you to start a game of chess, in which case you will use the
+    initialize_game tool. If the student issues an instruction for a move, you will infer and
+    provide the legal move in UCI notation to the make_chess_move tool. For instance,
+    "Move my king's pawn up two" corresponds to "e2e4".
+    
     If the student does not issue an instruction for a a move, respond to their query. For example,
     the student might ask "Can you give me a hint?" or "How could I have defended against that?"
 
@@ -62,12 +41,11 @@ def get_analysis_agent() -> Runnable:
 
     Limit your commentary to 20 words or fewer.
     """
-    tools = _get_tools()
+    tools = get_tools()
     prompt = ChatPromptTemplate.from_messages(
         [
             ("system", dedent(system_message)),
             MessagesPlaceholder(variable_name="chat_history"),
-            ("system", "{board_context}"),
             ("user", "{user_message}"),
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ]
@@ -80,7 +58,6 @@ def get_analysis_agent() -> Runnable:
 
     agent = (
         {
-            "board_context": lambda x: x["board_context"],
             "user_message": lambda x: x["user_message"],
             "chat_history": lambda x: x["chat_history"],
             "agent_scratchpad": lambda x: format_to_openai_function_messages(
@@ -93,20 +70,3 @@ def get_analysis_agent() -> Runnable:
     )
 
     return agent
-
-
-def query_agent(user_message: str, board: chess.Board, chat_history: list) -> dict:
-    """Build board context and query agent."""
-    agent = get_analysis_agent()
-    tools = _get_tools(board)
-    agent_executor = AgentExecutor(agent=agent, tools=tools)
-
-    board_context = SystemMessage(content=make_system_message(board))
-
-    return agent_executor.invoke(
-        {
-            "board_context": board_context,
-            "user_message": user_message,
-            "chat_history": chat_history,
-        },
-    )

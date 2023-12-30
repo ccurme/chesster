@@ -1,7 +1,11 @@
+import io
+import os
+from typing import Iterable
+
 import chess
+import chess.engine
+import chess.pgn
 import chess.svg
-from IPython.core.interactiveshell import InteractiveShell
-from IPython.display import display
 
 
 def _clean_up_prompt(prompt: str) -> str:
@@ -9,33 +13,60 @@ def _clean_up_prompt(prompt: str) -> str:
     return "\n".join(line.lstrip() for line in prompt.splitlines())
 
 
-def display_board(board) -> None:
+def get_stockfish_engine(skill_level: int = 3) -> chess.engine.SimpleEngine:
+    """Load Stockfish engine."""
+    engine_path = os.getenv(
+        "STOCKFISH_ENGINE_PATH", "stockfish/stockfish-ubuntu-x86-64-modern"
+    )
+    engine = chess.engine.SimpleEngine.popen_uci(engine_path)
+    engine.configure({"Skill Level": skill_level})
+
+    return engine
+
+
+def get_engine_move(board: chess.Board) -> chess.Move:
+    """Get move from engine."""
+    engine = get_stockfish_engine()
+    engine_result = engine.play(board, chess.engine.Limit(time=0.1))
+    engine.quit()
+    return engine_result.move
+
+
+def parse_chess_move(board: chess.Board, move_uci: str) -> chess.Move:
+    """Parse chess move from UCI format."""
+    try:
+        return chess.Move.from_uci(move_uci)
+    except chess.InvalidMoveError:
+        return board.parse_san(move_uci)  # LLM sometimes outputs SAN
+
+
+def parse_pgn_into_move_list(game_pgn: str) -> Iterable[chess.Move]:
+    """Parse PGN into list of Move objects."""
+    pgn_fp = io.StringIO(game_pgn)
+    game = chess.pgn.read_game(pgn_fp)
+    return game.mainline_moves()
+
+
+def display_board(board, player_side: chess.Color) -> None:
     """Display board."""
     board_size = 360
-    if board.player_side == chess.WHITE:
+    if player_side == chess.WHITE:
         flipped = False
     else:
         flipped = True
-    if InteractiveShell.initialized():
-        if board.move_stack:
-            last_move = board.move_stack[-1]
-        else:
-            last_move = None
-        display(
-            chess.svg.board(board, flipped=flipped, size=board_size, lastmove=last_move)
-        )
+    if board.move_stack:
+        last_move = board.move_stack[-1]
     else:
-        delimiter = "---------------"
-        print(delimiter)
-        if flipped:
-            print(board.mirror())
-        else:
-            print(board)
+        last_move = None
+    return chess.svg.board(board, flipped=flipped, size=board_size, lastmove=last_move)
 
 
-def serialize_board_state(board: chess.Board) -> str:
+def serialize_board_state(board: chess.Board, player_side: chess.Color) -> str:
     """Serialize board state."""
-    board_picture = str(board)
+    if player_side == chess.BLACK:
+        board_picture = str(board.mirror())
+    else:
+        board_picture = str(board)
     return f"{board_picture}\n\n{chess.Board().variation_san(board.move_stack)}"
 
 
@@ -47,19 +78,21 @@ def serialize_player_side(player_side: chess.Color) -> str:
         return "black"
 
 
-def make_system_message(board: chess.Board) -> str:
+def serialize_board_state_with_last_move(
+    board: chess.Board, player_side: chess.Color
+) -> str:
     """Make message capturing board state."""
     board_state_str = f"""
-        Player is playing as {serialize_player_side(board.player_side)}.
+        Player is playing as {serialize_player_side(player_side)}.
 
         Current board state:
-        {serialize_board_state(board)}
+        {serialize_board_state(board, player_side)}
     """
     if board.move_stack:
         last_move = board.pop()
         last_move_san = board.san(last_move)
         board.push(last_move)
-        if board.turn == board.player_side:
+        if board.turn == player_side:
             last_to_move = "Opponent"
         else:
             last_to_move = "Player"

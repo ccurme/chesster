@@ -1,0 +1,50 @@
+body {
+    background-color: #333333;
+    color: #ffffff; /* Text color */
+    font-family: 'Courier New', Courier, monospace;
+    overflow: hidden;
+}
+#image {
+    display: none;   /* Hide image initially */
+}
+/* Star-related CSS */
+#star-field {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+.star {
+  width: 2px;
+  height: 2px;
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+}
+.star.far {
+  width: 1px;
+  height: 1px;
+}
+.star.near {
+  width: 4px;
+  height: 4px;
+}
+.star.white {
+  background: #fff;
+  box-shadow: 0 0 15px #fff;
+}
+.star.yellow {
+  background: #BFBB40;
+  box-shadow: 0 0 15px #BFBB40;
+}
+.star.blue {
+  background: #4444ff;
+  box-shadow: 0 0 15px #4444ff;
+}
+.star.red {
+  background: #ff4444;
+  box-shadow: 0 0 15px #ff4444;
+}
