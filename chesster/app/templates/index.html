@@ -5,12 +5,21 @@
         <link rel="stylesheet" type="text/css" href="/static/css/style.css">
     </head>
     <body>
-        <div id="star-field"></div> <!-- Star-field div -->
-        <div id="content-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh;">
+    <div id="star-field"></div> <!-- Star-field div -->
+    <div id="main-container" style="display: flex; height: 100vh;">
+        <div id="content-container" style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 66.66%;">
             <h1>Chesster</h1>
             <p id="message">Loading...</p>
             <img id="image" src="" alt="Board will be displayed here"/>
             <ul id='messages'></ul>
-            <script src="/static/js/script.js"></script>
+        </div>
+        <div id="chat-container" style="position: relative; width: 33.33%; height: 100%; background: rgba(0,0,0,0); overflow: auto;">
+            <ul id="chat-messages"></ul>
+            <form id="chat-form">
+                <input id="chat-input" type="text" placeholder="Type your message here...">
+            </form>
+        </div>
+    </div>
+    <script src="/static/js/script.js"></script>
     </body>
 </html>

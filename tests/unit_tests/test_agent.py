@@ -119,10 +119,5 @@ def test_agent(mock_llm, mock_post):
                 "chat_history": chat_history,
             }
         )
-        chat_history.extend(
-            [
-                HumanMessage(content=user_message),
-                AIMessage(content=response["output"]),
-            ]
-        )
+        chat_history.append((user_message, response["output"]))
         assert response["output"] == expected_response

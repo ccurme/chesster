@@ -2,12 +2,21 @@ from textwrap import dedent
 
 from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
 from langchain.agents.format_scratchpad import format_to_openai_function_messages
+from langchain.schema import AIMessage, HumanMessage
 from langchain_community.chat_models import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import Runnable
 from langchain.tools.render import format_tool_to_openai_function
 
 from chesster.tools import get_tools
+
+
+def _format_chat_history(chat_history: list[tuple[str, str]]):
+    buffer = []
+    for human, ai in chat_history:
+        buffer.append(HumanMessage(content=human))
+        buffer.append(AIMessage(content=ai))
+    return buffer
 
 
 def get_agent() -> Runnable:
@@ -51,6 +60,7 @@ def get_agent() -> Runnable:
         ]
     )
 
+    # TODO: enable streaming: https://python.langchain.com/docs/modules/agents/how_to/streaming
     llm = ChatOpenAI(model="gpt-4-1106-preview", temperature=0)
     llm_with_tools = llm.bind(
         functions=[format_tool_to_openai_function(tool) for tool in tools]
@@ -59,7 +69,7 @@ def get_agent() -> Runnable:
     agent = (
         {
             "user_message": lambda x: x["user_message"],
-            "chat_history": lambda x: x["chat_history"],
+            "chat_history": lambda x: _format_chat_history(x["chat_history"]),
             "agent_scratchpad": lambda x: format_to_openai_function_messages(
                 x["intermediate_steps"]
             ),
