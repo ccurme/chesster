@@ -64,6 +64,8 @@ async def make_move_vs_opponent(move_str: str) -> dict:
     if board_manager.board.is_game_over():
         return {"message": "Game over."}
     move = parse_chess_move(board_manager.board, move_str)
+    if not board_manager.board.is_legal(move):
+        return {"message": "Illegal move, try again."}
     move_san = board_manager.board.san(move)
     await board_manager.make_move(move)
     opponent_move = get_engine_move(board_manager.board)
