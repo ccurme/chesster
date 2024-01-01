@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import os
+
 from fastapi import FastAPI
 from langchain.agents import AgentExecutor
 from langchain.pydantic_v1 import BaseModel, Field
@@ -6,6 +8,8 @@ from langserve import add_routes
 
 from chesster.langserve.agent import get_agent, get_tools
 
+
+HOST = os.getenv("LANGSERVE_HOST", "localhost")
 
 app = FastAPI(
   title="Chesster chat server.",
@@ -34,4 +38,4 @@ add_routes(
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="localhost", port=8080)
+    uvicorn.run(app, host=HOST, port=8080)
