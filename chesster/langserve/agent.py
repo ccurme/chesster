@@ -8,7 +8,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import Runnable
 from langchain.tools.render import format_tool_to_openai_function
 
-from chesster.tools import get_tools
+from chesster.langserve.tools import get_tools
 
 
 def _format_chat_history(chat_history: list[tuple[str, str]]):
