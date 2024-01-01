@@ -4,7 +4,7 @@ from langchain.agents import AgentExecutor
 from langchain.pydantic_v1 import BaseModel, Field
 from langserve import add_routes
 
-from chesster.agent import get_agent, get_tools
+from chesster.langserve.agent import get_agent, get_tools
 
 
 app = FastAPI(

@@ -5,7 +5,7 @@ from langchain.agents import AgentExecutor
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.runnables import Runnable
 
-from chesster import agent
+from chesster.langserve import agent
 from chesster.app.app import app
 
 client = TestClient(app)
