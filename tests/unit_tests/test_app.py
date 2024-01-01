@@ -1,7 +1,8 @@
+import urllib
+
 import chess
 from fastapi.testclient import TestClient
 import pytest
-import urllib
 
 from chesster.app import app
 

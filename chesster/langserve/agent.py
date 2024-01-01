@@ -1,12 +1,12 @@
 from textwrap import dedent
 
-from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
 from langchain.agents.format_scratchpad import format_to_openai_function_messages
+from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
 from langchain.schema import AIMessage, HumanMessage
+from langchain.tools.render import format_tool_to_openai_function
 from langchain_community.chat_models import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import Runnable
-from langchain.tools.render import format_tool_to_openai_function
 
 from chesster.langserve.tools import get_tools
 
