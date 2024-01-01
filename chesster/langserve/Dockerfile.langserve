@@ -1,0 +1,8 @@
+FROM base_image:latest
+
+EXPOSE 8080
+
+ENV LANGSERVE_HOST=0.0.0.0
+CMD ["poetry", "run", "python", "chesster/langserve/langserver.py"]
+# CMD exec poetry run uvicorn chesster.langserve.langserver:app --port 8080 --host 0.0.0.0
+# CMD ["poetry", "run", "uvicorn", "chesster.langserve.langserver:app --port 8080"]

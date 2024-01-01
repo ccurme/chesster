@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  base:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    image: base_image:latest
+
+  langserver:
+    build:
+      context: .
+      dockerfile: chesster/langserve/Dockerfile.langserve
+    ports:
+      - "8080:8080"
+    environment:
+      - OPENAI_API_KEY
+    volumes:
+      - .:/chesster
+
+  app:
+    build:
+      context: .
+      dockerfile: chesster/app/Dockerfile.app
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/chesster
