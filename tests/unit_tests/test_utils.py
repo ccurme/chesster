@@ -1,7 +1,7 @@
 import chess
 from langchain.input import print_text
 
-from chesster import utils
+from chesster.app import utils
 
 
 def _check_indentation(multi_line_string: str) -> None:

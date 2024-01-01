@@ -6,7 +6,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 from langchain.schema import AIMessage, HumanMessage
 from langserve import RemoteRunnable
 
-from chesster.utils import (
+from chesster.app.utils import (
     display_board,
     get_engine_score,
     serialize_board_state_with_last_move,
