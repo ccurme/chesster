@@ -1,14 +1,10 @@
 from unittest.mock import MagicMock, patch
 
-from fastapi.testclient import TestClient
 from langchain.agents import AgentExecutor
-from langchain_core.messages import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage
 from langchain_core.runnables import Runnable
 
 from chesster.langserve import agent
-from chesster.app.app import app
-
-client = TestClient(app)
 
 
 def _make_mock_llm(*args, **kwargs) -> Runnable:
@@ -86,7 +82,7 @@ def _make_mock_llm(*args, **kwargs) -> Runnable:
 
 
 @patch("requests.post")
-@patch("chesster.agent.ChatOpenAI", return_value=_make_mock_llm())
+@patch("chesster.langserve.agent.ChatOpenAI", return_value=_make_mock_llm())
 def test_agent(mock_llm, mock_post):
 
     tools = agent.get_tools()

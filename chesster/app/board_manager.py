@@ -3,7 +3,6 @@ import urllib
 
 import chess
 from fastapi import WebSocket, WebSocketDisconnect
-from langchain.schema import AIMessage, HumanMessage
 from langserve import RemoteRunnable
 
 from chesster.app.utils import (

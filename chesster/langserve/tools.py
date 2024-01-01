@@ -2,8 +2,8 @@ import os
 import requests
 import urllib
 
-from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain.tools import StructuredTool, Tool
+from langchain_core.pydantic_v1 import BaseModel, Field
 
 
 SERVER_URL = os.getenv("SERVER_URL", "http://localhost:8000")
