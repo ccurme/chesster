@@ -17,8 +17,8 @@ lint:
 start:
 	# Ctrl+C will kill both servers
 	/bin/bash -c "trap 'kill %1; kill %2' SIGINT; \
-	uvicorn chesster.app.app:app & \
-	python chesster/langserve/langserver.py & \
+	poetry run uvicorn chesster.app.app:app & \
+	poetry run python chesster/langserve/langserver.py & \
 	wait"
 
 unit_tests:
