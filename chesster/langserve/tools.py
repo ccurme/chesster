@@ -12,6 +12,7 @@ def _get_server_url():
     server_port = os.getenv("SERVER_PORT", "8000")
     return f"http://{server_host}:{server_port}"
 
+
 SERVER_URL = _get_server_url()
 
 

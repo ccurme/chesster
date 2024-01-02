@@ -12,9 +12,10 @@ from chesster.langserve.agent import get_agent, get_tools
 HOST = os.getenv("LANGSERVE_HOST", "localhost")
 
 app = FastAPI(
-  title="Chesster chat server.",
-  version="1.0",
+    title="Chesster chat server.",
+    version="1.0",
 )
+
 
 class AgentInput(BaseModel):
     user_message: str
@@ -22,12 +23,12 @@ class AgentInput(BaseModel):
         ..., extra={"widget": {"type": "chat", "input": "input", "output": "output"}}
     )
 
+
 tools = get_tools()
 agent = get_agent()
-agent_executor = (
-    AgentExecutor(agent=agent, tools=tools).with_types(input_type=AgentInput)
-    | (lambda x: x["output"])
-)
+agent_executor = AgentExecutor(agent=agent, tools=tools).with_types(
+    input_type=AgentInput
+) | (lambda x: x["output"])
 
 add_routes(
     app,
