@@ -25,7 +25,7 @@ class BoardManager:
         self.player_side = chess.WHITE
         self.interesting_move_iterator = None
         self.chat_history = []
-        self.remote_runnable = RemoteRunnable(f"http://{LANGSERVE_HOST}:8080/chesster")
+        self.remote_runnable = RemoteRunnable(f"http://{LANGSERVE_HOST}:8001/chesster")
 
     async def set_board(self, board: chess.Board) -> None:
         """Set board."""
