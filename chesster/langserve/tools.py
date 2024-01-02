@@ -6,7 +6,13 @@ from langchain.tools import StructuredTool, Tool
 from langchain_core.pydantic_v1 import BaseModel, Field
 
 
-SERVER_URL = os.getenv("SERVER_URL", "http://localhost:8000")
+def _get_server_url():
+    """Get URL for app server."""
+    server_host = os.getenv("SERVER_HOST", "localhost")
+    server_port = os.getenv("SERVER_PORT", "8000")
+    return f"http://{server_host}:{server_port}"
+
+SERVER_URL = _get_server_url()
 
 
 class InitializeGameInput(BaseModel):
