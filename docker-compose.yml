@@ -15,8 +15,6 @@ services:
       - "8001:8001"
     environment:
       - OPENAI_API_KEY
-    volumes:
-      - .:/chesster
 
   app:
     build:
@@ -24,5 +22,3 @@ services:
       dockerfile: chesster/app/Dockerfile.app
     ports:
       - "8000:8000"
-    volumes:
-      - .:/chesster
