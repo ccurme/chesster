@@ -1,18 +1,19 @@
+import os
 from typing import Iterator
 import urllib
 
 import chess
 from fastapi import WebSocket, WebSocketDisconnect
-from langchain.schema import AIMessage, HumanMessage
 from langserve import RemoteRunnable
 
-from chesster.utils import (
+from chesster.app.utils import (
     display_board,
     get_engine_score,
     serialize_board_state_with_last_move,
 )
 
 
+LANGSERVE_HOST = os.getenv("LANGSERVE_HOST", "localhost")
 CHAT_HISTORY_LENGTH = 50  # Number of most recent (human, ai) exchanges to retain.
 
 
@@ -24,7 +25,7 @@ class BoardManager:
         self.player_side = chess.WHITE
         self.interesting_move_iterator = None
         self.chat_history = []
-        self.remote_runnable = RemoteRunnable("http://localhost:8080/chesster")
+        self.remote_runnable = RemoteRunnable(f"http://{LANGSERVE_HOST}:8001/chesster")
 
     async def set_board(self, board: chess.Board) -> None:
         """Set board."""

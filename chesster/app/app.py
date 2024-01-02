@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from chesster.app.board_manager import BoardManager
-from chesster.utils import (
+from chesster.app.utils import (
     get_engine_move,
     parse_chess_move,
     parse_pgn_into_move_list,

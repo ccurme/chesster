@@ -1,0 +1,8 @@
+FROM base_image:latest
+
+EXPOSE 8001
+
+ENV SERVER_HOST=app
+ENV SERVER_PORT=8000
+ENV LANGSERVE_HOST=0.0.0.0
+CMD ["poetry", "run", "python", "chesster/langserve/langserver.py"]
