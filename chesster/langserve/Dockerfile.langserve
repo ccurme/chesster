@@ -5,5 +5,3 @@ EXPOSE 8001
 ENV SERVER_URL="http://app:8000"
 ENV LANGSERVE_HOST=0.0.0.0
 CMD ["poetry", "run", "python", "chesster/langserve/langserver.py"]
-# CMD exec poetry run uvicorn chesster.langserve.langserver:app --port 8080 --host 0.0.0.0
-# CMD ["poetry", "run", "uvicorn", "chesster.langserve.langserver:app --port 8080"]
