@@ -1,5 +1,5 @@
 import time
-from typing import Any, AsyncIterator
+from typing import AsyncIterator
 
 import chess
 import chess.svg
@@ -30,7 +30,7 @@ async def root(request: Request):
 
 
 @app.post("/set_player_side/{color}")
-async def set_player_side(color: str) -> dict:
+async def set_player_side(color: str) -> str:
     """Set side to black or white."""
     if "w" in color:
         player_side = chess.WHITE
@@ -39,11 +39,11 @@ async def set_player_side(color: str) -> dict:
         player_side = chess.BLACK
         side_str = "black"
     await board_manager.set_player_side(player_side)
-    return {"message": f"Updated player side successfully to {side_str}."}
+    return f"Updated player side successfully to {side_str}."
 
 
 @app.post("/initialize_game_vs_opponent/{player_side_str}")
-async def initialize_game_vs_opponent(player_side_str: str) -> dict:
+async def initialize_game_vs_opponent(player_side_str: str) -> str:
     """Start new game."""
     await board_manager.set_board(chess.Board())
     _ = await set_player_side(player_side_str)
@@ -55,11 +55,11 @@ async def initialize_game_vs_opponent(player_side_str: str) -> dict:
     else:
         response = "Game initialized. Your move."
 
-    return {"message": response}
+    return response
 
 
 @app.post("/make_move_vs_opponent/{move_str}")
-async def make_move_vs_opponent(move_str: str) -> dict:
+async def make_move_vs_opponent(move_str: str) -> str:
     """Push move to board against engine. Move should be a valid UCI string."""
     if board_manager.board.is_game_over():
         return {"message": "Game over."}
@@ -77,11 +77,11 @@ async def make_move_vs_opponent(move_str: str) -> dict:
         f" to {opponent_move_san}.\n\n"
         f"Board state:\n{serialize_board_state(board_manager.board, board_manager.player_side)}"
     )
-    return {"message": response}
+    return response
 
 
 @app.post("/make_board_from_pgn/{pgn_str}/{player_side_str}")
-async def make_board_from_pgn(pgn_str: str, player_side_str: str) -> dict:
+async def make_board_from_pgn(pgn_str: str, player_side_str: str) -> str:
     """Initialize board from PGN string."""
     move_stack = parse_pgn_into_move_list(pgn_str)
     await board_manager.set_board(chess.Board())
@@ -93,21 +93,20 @@ async def make_board_from_pgn(pgn_str: str, player_side_str: str) -> dict:
         "Successfully uploaded board. Board state:\n"
         f"{serialize_board_state(board_manager.board, board_manager.player_side)}"
     )
-    return {"message": response}
+    return response
 
 
-async def _safe_next(iterator: AsyncIterator) -> Any:
+async def _safe_next(iterator: AsyncIterator) -> str:
     """Next but catch StopIteration and return a message."""
     try:
         return await anext(iterator)
     except StopAsyncIteration:
-        return {"result": "End of iteration."}
+        return "End of iteration."
 
 
 @app.post("/get_next_interesting_move/")
-async def get_next_interesting_move() -> dict:
-    result = await _safe_next(board_manager.interesting_move_iterator)
-    return {"result": result}
+async def get_next_interesting_move() -> str:
+    return await _safe_next(board_manager.interesting_move_iterator)
 
 
 @app.websocket("/ws")

@@ -1,9 +1,12 @@
+import json
 import os
 from typing import Iterator
 import urllib
 
 import chess
 from fastapi import WebSocket, WebSocketDisconnect
+from langchain.agents import AgentExecutor
+from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
 from langserve import RemoteRunnable
 
 from chesster.app.utils import (
@@ -11,6 +14,7 @@ from chesster.app.utils import (
     get_engine_score,
     serialize_board_state_with_last_move,
 )
+from chesster.langserve.tools import get_tools
 
 
 LANGSERVE_HOST = os.getenv("LANGSERVE_HOST", "localhost")
@@ -61,12 +65,13 @@ class BoardManager:
             if new_board.turn != self.player_side:  # player just moved
                 if abs(delta) > centipawn_threshold:
                     await self.update_board(new_board)
-                    yield {
+                    context = {
                         "board": serialize_board_state_with_last_move(
                             new_board, self.player_side
                         ),
                         "last_move_centipawns": delta,
                     }
+                    yield json.dumps(context)
             centipawns = new_centipawns
 
     async def update_board(self, board: chess.Board) -> None:
@@ -91,12 +96,15 @@ class BoardManager:
                 else:
                     user_message = data
                     await websocket.send_text(user_message)
-                    response_message = await self.remote_runnable.ainvoke(
+                    chain = self.remote_runnable | OpenAIFunctionsAgentOutputParser()
+                    agent_executor = AgentExecutor(agent=chain, tools=get_tools())
+                    response = await agent_executor.ainvoke(
                         {
                             "user_message": user_message,
                             "chat_history": self.chat_history,
                         }
                     )
+                    response_message = response["output"]
                     self.chat_history.append((user_message, response_message))
                     self.chat_history = self.chat_history[-CHAT_HISTORY_LENGTH:]
                     await websocket.send_text(response_message)

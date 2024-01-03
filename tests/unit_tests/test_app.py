@@ -1,3 +1,4 @@
+import json
 import urllib
 
 import chess
@@ -19,22 +20,22 @@ def test_root():
 def test_set_player_side():
     response = client.post("/set_player_side/w")
     assert response.status_code == 200
-    assert {"message": "Updated player side successfully to white."} == response.json()
+    assert "Updated player side successfully to white." == response.json()
 
     response = client.post("/set_player_side/b")
     assert response.status_code == 200
-    assert {"message": "Updated player side successfully to black."} == response.json()
+    assert "Updated player side successfully to black." == response.json()
 
 
 def test_initialize_game_vs_opponent():
     response = client.post("/initialize_game_vs_opponent/w")
     assert response.status_code == 200
-    assert response.json() == {"message": "Game initialized. Your move."}
+    assert response.json() == "Game initialized. Your move."
     assert [] == app.board_manager.board.move_stack
 
     response = client.post("/initialize_game_vs_opponent/b")
     assert response.status_code == 200
-    assert "Opponent move" in response.json()["message"]
+    assert "Opponent move" in response.json()
     assert 1 == len(app.board_manager.board.move_stack)
 
 
@@ -67,5 +68,5 @@ def test_make_board_from_pgn_and_get_interesting_moves():
 
     response = client.post("/get_next_interesting_move")
     assert response.status_code == 200
-    response_data = response.json()
-    assert {"board", "last_move_centipawns"} == set(response_data["result"].keys())
+    response_data = json.loads(response.json())
+    assert {"board", "last_move_centipawns"} == set(response_data.keys())

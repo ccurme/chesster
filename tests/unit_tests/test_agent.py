@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 from langchain.agents import AgentExecutor
+from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import Runnable
 
@@ -86,7 +87,7 @@ def _make_mock_llm(*args, **kwargs) -> Runnable:
 def test_agent(mock_llm, mock_post):
 
     tools = agent.get_tools()
-    agent_runnable = agent.get_agent()
+    agent_runnable = agent.get_agent() | OpenAIFunctionsAgentOutputParser()
     agent_executor = AgentExecutor(agent=agent_runnable, tools=tools)
     chat_history = []
 
