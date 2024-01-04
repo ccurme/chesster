@@ -36,7 +36,7 @@ class InitializeGameFromPGNInput(BaseModel):
         description="The PGN string of the game, e.g., '1. d4 Nf6 2. Nc3 g6'",
     )
     player_side_string: str = Field(
-        ...,
+        "white",
         description="The player's side of choice, either 'black' or 'white'",
     )
 
@@ -45,20 +45,20 @@ def _add_board_id_to_model(model: BaseModel):
     return create_model(new_name, board_id=(str, ...), __base__=model)
 
 
-def _initialize_game(board_id: str = "", player_side: str = "") -> dict:
+def _initialize_game(board_id: str, player_side: str) -> dict:
     """Use this tool to make a chess move. Input the move in UCI format."""
     response = requests.post(f"{SERVER_URL}/initialize_game_vs_opponent/{player_side}")
     return response.json()
 
 
-def _make_chess_move(board_id: str = "", move_uci: str = "") -> dict:
+def _make_chess_move(board_id: str, move_uci: str) -> dict:
     """Use this tool to make a chess move. Input the move in UCI format."""
     response = requests.post(f"{SERVER_URL}/make_move_vs_opponent/{move_uci}")
     return response.json()
 
 
 def _initialize_game_from_pgn(
-    board_id: str = "", pgn_string: str = "", player_side_string: str = "white"
+    board_id: str, pgn_string: str, player_side_string: str = "white"
 ) -> dict:
     """Use this tool to initialize a previously played game."""
     encoded_pgn_str = urllib.parse.quote(pgn_string)
@@ -68,7 +68,7 @@ def _initialize_game_from_pgn(
     return response.json()
 
 
-def _get_next_interesting_move(board_id: str = "") -> dict:
+def _get_next_interesting_move(board_id: str) -> dict:
     """Use this tool to get the next interesting move according to the engine."""
     response = requests.post(f"{SERVER_URL}/get_next_interesting_move")
 
