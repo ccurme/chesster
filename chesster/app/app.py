@@ -110,7 +110,9 @@ async def _safe_next(iterator: AsyncIterator) -> Any:
 async def get_next_interesting_move() -> dict:
     result = await _safe_next(board_manager.interesting_move_iterator)
     await board_manager.display_board(result["board"], board_manager.active_websockets)
-    result["board"] = serialize_board_state_with_last_move(result["board"], board_manager.player_side)
+    result["board"] = serialize_board_state_with_last_move(
+        result["board"], board_manager.player_side
+    )
     return {"result": result}
 
 
@@ -136,7 +138,9 @@ async def websocket_endpoint(websocket: WebSocket):
                     }
                 )
                 board_manager.chat_history.append((user_message, response_message))
-                board_manager.chat_history = board_manager.chat_history[-CHAT_HISTORY_LENGTH:]
+                board_manager.chat_history = board_manager.chat_history[
+                    -CHAT_HISTORY_LENGTH:
+                ]
                 await websocket.send_text(response_message)
     except WebSocketDisconnect:
         board_manager.active_websockets.remove(websocket)

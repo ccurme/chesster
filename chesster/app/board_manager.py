@@ -1,5 +1,5 @@
 import os
-from typing import Iterator, Optional
+from typing import Iterator
 import urllib
 
 import chess
@@ -9,7 +9,6 @@ from langserve import RemoteRunnable
 from chesster.app.utils import (
     display_board,
     get_engine_score,
-    serialize_board_state_with_last_move,
 )
 
 
