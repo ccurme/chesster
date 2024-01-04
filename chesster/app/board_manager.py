@@ -95,6 +95,7 @@ class BoardManager:
                         {
                             "user_message": user_message,
                             "chat_history": self.chat_history,
+                            "board_id": "0",
                         }
                     )
                     self.chat_history.append((user_message, response_message))

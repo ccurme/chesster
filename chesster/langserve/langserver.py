@@ -19,12 +19,13 @@ app = FastAPI(
 
 class AgentInput(BaseModel):
     user_message: str
+    board_id: str
     chat_history: list[tuple[str, str]] = Field(
         ..., extra={"widget": {"type": "chat", "input": "input", "output": "output"}}
     )
 
 
-tools = get_tools()
+tools = get_tools(pass_board_id=True)
 agent = get_agent()
 agent_executor = AgentExecutor(agent=agent, tools=tools).with_types(
     input_type=AgentInput
