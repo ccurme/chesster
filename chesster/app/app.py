@@ -14,6 +14,7 @@ from chesster.app.utils import (
     parse_chess_move,
     parse_pgn_into_move_list,
     serialize_board_state,
+    serialize_board_state_with_last_move,
 )
 
 
@@ -108,6 +109,8 @@ async def _safe_next(iterator: AsyncIterator) -> Any:
 @app.post("/get_next_interesting_move/")
 async def get_next_interesting_move() -> dict:
     result = await _safe_next(board_manager.interesting_move_iterator)
+    await board_manager.display_board(result["board"], board_manager.active_websockets)
+    result["board"] = serialize_board_state_with_last_move(result["board"], board_manager.player_side)
     return {"result": result}
 
 

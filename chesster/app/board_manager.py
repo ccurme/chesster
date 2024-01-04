@@ -59,11 +59,8 @@ class BoardManager:
             delta = new_centipawns - centipawns
             if new_board.turn != self.player_side:  # player just moved
                 if abs(delta) > centipawn_threshold:
-                    await self.display_board(new_board, self.active_websockets)
                     yield {
-                        "board": serialize_board_state_with_last_move(
-                            new_board, self.player_side
-                        ),
+                        "board": new_board,
                         "last_move_centipawns": delta,
                     }
             centipawns = new_centipawns
