@@ -25,7 +25,7 @@ def _make_mock_llm(*args, **kwargs) -> Runnable:
             content="",
             additional_kwargs={
                 "function_call": {
-                    "arguments": '{"move":"d2d4"}',
+                    "arguments": '{"move_uci":"d2d4"}',
                     "name": "make_chess_move",
                 }
             },
@@ -35,7 +35,7 @@ def _make_mock_llm(*args, **kwargs) -> Runnable:
             content="",
             additional_kwargs={
                 "function_call": {
-                    "arguments": '{"move":"b1c3"}',
+                    "arguments": '{"move_uci":"b1c3"}',
                     "name": "make_chess_move",
                 }
             },
@@ -85,7 +85,7 @@ def _make_mock_llm(*args, **kwargs) -> Runnable:
 @patch("chesster.langserve.agent.ChatOpenAI", return_value=_make_mock_llm())
 def test_agent(mock_llm, mock_post):
 
-    tools = agent.get_tools()
+    tools = agent.get_tools(pass_board_id=True)
     agent_runnable = agent.get_agent()
     agent_executor = AgentExecutor(agent=agent_runnable, tools=tools)
     chat_history = []
