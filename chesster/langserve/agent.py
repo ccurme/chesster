@@ -25,9 +25,13 @@ def _add_board_id_to_function_call(_dict: dict) -> AIMessage:
     ai_message = _dict["ai_message"]
     board_id = _dict["board_id"]
     if "function_call" in ai_message.additional_kwargs:
-        arguments = json.loads(ai_message.additional_kwargs["function_call"]["arguments"])
+        arguments = json.loads(
+            ai_message.additional_kwargs["function_call"]["arguments"]
+        )
         arguments["board_id"] = board_id
-        ai_message.additional_kwargs["function_call"]["arguments"] = json.dumps(arguments)
+        ai_message.additional_kwargs["function_call"]["arguments"] = json.dumps(
+            arguments
+        )
 
     return ai_message
 
@@ -91,12 +95,12 @@ def get_agent() -> Runnable:
     )
 
     chain = (
-    {
-        "ai_message": agent_chain,
-        "board_id": lambda x: x["board_id"],
-    }
-    | RunnableLambda(_add_board_id_to_function_call)
-    | OpenAIFunctionsAgentOutputParser()
-)
+        {
+            "ai_message": agent_chain,
+            "board_id": lambda x: x["board_id"],
+        }
+        | RunnableLambda(_add_board_id_to_function_call)
+        | OpenAIFunctionsAgentOutputParser()
+    )
 
     return chain

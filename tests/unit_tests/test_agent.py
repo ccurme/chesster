@@ -123,15 +123,50 @@ def test_agent(mock_llm, mock_post):
 def test_add_board_id_to_function_call():
     ai_message = AIMessage(content="Let's play chess.")
     board_id = "0"
-    result = agent._add_board_id_to_function_call({"ai_message": ai_message, "board_id": board_id})
+    result = agent._add_board_id_to_function_call(
+        {"ai_message": ai_message, "board_id": board_id}
+    )
     assert result == ai_message
 
-    ai_message = AIMessage(content='', additional_kwargs={'function_call': {'arguments': '{"player_side":"white"}', 'name': 'initialize_game'}})
-    result = agent._add_board_id_to_function_call({"ai_message": ai_message, "board_id": board_id})
-    expected = AIMessage(content='', additional_kwargs={'function_call': {'arguments': '{"player_side": "white", "board_id": "0"}', 'name': 'initialize_game'}})
+    ai_message = AIMessage(
+        content="",
+        additional_kwargs={
+            "function_call": {
+                "arguments": '{"player_side":"white"}',
+                "name": "initialize_game",
+            }
+        },
+    )
+    result = agent._add_board_id_to_function_call(
+        {"ai_message": ai_message, "board_id": board_id}
+    )
+    expected = AIMessage(
+        content="",
+        additional_kwargs={
+            "function_call": {
+                "arguments": '{"player_side": "white", "board_id": "0"}',
+                "name": "initialize_game",
+            }
+        },
+    )
     assert expected == result
 
-    ai_message = AIMessage(content='', additional_kwargs={'function_call': {'arguments': '{}', 'name': 'get_next_interesting_move'}})
-    result = agent._add_board_id_to_function_call({"ai_message": ai_message, "board_id": board_id})
-    expected = AIMessage(content='', additional_kwargs={'function_call': {'arguments': '{"board_id": "0"}', 'name': 'get_next_interesting_move'}})
+    ai_message = AIMessage(
+        content="",
+        additional_kwargs={
+            "function_call": {"arguments": "{}", "name": "get_next_interesting_move"}
+        },
+    )
+    result = agent._add_board_id_to_function_call(
+        {"ai_message": ai_message, "board_id": board_id}
+    )
+    expected = AIMessage(
+        content="",
+        additional_kwargs={
+            "function_call": {
+                "arguments": '{"board_id": "0"}',
+                "name": "get_next_interesting_move",
+            }
+        },
+    )
     assert expected == result
