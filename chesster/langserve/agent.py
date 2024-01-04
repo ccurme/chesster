@@ -1,3 +1,4 @@
+import json
 from textwrap import dedent
 
 from langchain.agents.format_scratchpad import format_to_openai_function_messages
@@ -6,7 +7,7 @@ from langchain.schema import AIMessage, HumanMessage
 from langchain.tools.render import format_tool_to_openai_function
 from langchain_community.chat_models import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.runnables import Runnable
+from langchain_core.runnables import Runnable, RunnableLambda
 
 from chesster.langserve.tools import get_tools
 
@@ -17,6 +18,18 @@ def _format_chat_history(chat_history: list[tuple[str, str]]):
         buffer.append(HumanMessage(content=human))
         buffer.append(AIMessage(content=ai))
     return buffer
+
+
+def _add_board_id_to_function_call(_dict: dict) -> AIMessage:
+    """Append board_id to function call."""
+    ai_message = _dict["ai_message"]
+    board_id = _dict["board_id"]
+    if "function_call" in ai_message.additional_kwargs:
+        arguments = json.loads(ai_message.additional_kwargs["function_call"]["arguments"])
+        arguments["board_id"] = board_id
+        ai_message.additional_kwargs["function_call"]["arguments"] = json.dumps(arguments)
+
+    return ai_message
 
 
 def get_agent() -> Runnable:
@@ -65,7 +78,7 @@ def get_agent() -> Runnable:
         functions=[format_tool_to_openai_function(tool) for tool in tools]
     )
 
-    agent = (
+    agent_chain = (
         {
             "user_message": lambda x: x["user_message"],
             "chat_history": lambda x: _format_chat_history(x["chat_history"]),
@@ -75,7 +88,15 @@ def get_agent() -> Runnable:
         }
         | prompt
         | llm_with_tools
-        | OpenAIFunctionsAgentOutputParser()
     )
 
-    return agent
+    chain = (
+    {
+        "ai_message": agent_chain,
+        "board_id": lambda x: x["board_id"],
+    }
+    | RunnableLambda(_add_board_id_to_function_call)
+    | OpenAIFunctionsAgentOutputParser()
+)
+
+    return chain
