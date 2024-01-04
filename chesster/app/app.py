@@ -3,7 +3,7 @@ from typing import Any, AsyncIterator
 
 import chess
 import chess.svg
-from fastapi import FastAPI, Request, WebSocket
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -22,6 +22,7 @@ app.mount("/static", StaticFiles(directory="chesster/app/static"), name="static"
 templates = Jinja2Templates(directory="chesster/app/templates")
 
 board_manager = BoardManager()
+CHAT_HISTORY_LENGTH = 50  # Number of most recent (human, ai) exchanges to retain.
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -112,4 +113,27 @@ async def get_next_interesting_move() -> dict:
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    return await board_manager.websocket_endpoint(websocket)
+    await websocket.accept()
+    board_manager.active_websockets.append(websocket)
+    try:
+        welcome_message = "Welcome to Chesster!"
+        await websocket.send_text(welcome_message)
+        while True:
+            data = await websocket.receive_text()
+            if data == "Show me the image":
+                if board_manager.last_updated_image is not None:
+                    await websocket.send_text(board_manager.last_updated_image)
+            else:
+                user_message = data
+                await websocket.send_text(user_message)
+                response_message = await board_manager.remote_runnable.ainvoke(
+                    {
+                        "user_message": user_message,
+                        "chat_history": board_manager.chat_history,
+                    }
+                )
+                board_manager.chat_history.append((user_message, response_message))
+                board_manager.chat_history = board_manager.chat_history[-CHAT_HISTORY_LENGTH:]
+                await websocket.send_text(response_message)
+    except WebSocketDisconnect:
+        board_manager.active_websockets.remove(websocket)
