@@ -7,10 +7,10 @@ from langchain.pydantic_v1 import BaseModel, Field
 from langserve import add_routes
 from typing_extensions import Annotated
 
-from agent import get_agent, get_tools
+from app.agent import get_agent, get_tools
 
 
-HOST = os.getenv("LANGSERVE_HOST", "localhost")
+HOST = os.getenv("LANGSERVE_HOST", "0.0.0.0")
 LANGSERVE_SECRET = os.getenv("LANGSERVE_SECRET", "secret")
 
 
@@ -50,4 +50,4 @@ add_routes(
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host=HOST, port=8001)
+    uvicorn.run(app, host=HOST, port=8080)
