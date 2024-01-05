@@ -15,6 +15,7 @@ langchain = ">= 0.0.350, < 1.0"
 openai = ">= 1.3.7 < 2"
 langserve = {version = ">= 0.0.37 < 1.0", extras = ["all"]}
 websockets = ">= 12.0 < 13.0"
+typing-extensions = "^4.9.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.2.0"

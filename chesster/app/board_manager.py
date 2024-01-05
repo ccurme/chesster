@@ -14,6 +14,7 @@ from chesster.app.utils import (
 
 
 LANGSERVE_HOST = os.getenv("LANGSERVE_HOST", "localhost")
+LANGSERVE_SECRET = os.getenv("LANGSERVE_SECRET", "secret")
 CHAT_HISTORY_LENGTH = 50  # Number of most recent (human, ai) exchanges to retain.
 
 
@@ -25,7 +26,9 @@ class BoardManager:
         self.player_side = chess.WHITE
         self.interesting_move_iterator = None
         self.chat_history = []
-        self.remote_runnable = RemoteRunnable(f"http://{LANGSERVE_HOST}:8001/chesster")
+        self.remote_runnable = RemoteRunnable(
+            f"http://{LANGSERVE_HOST}:8001/chesster", headers={"x-token": LANGSERVE_SECRET}
+        )
 
     async def set_board(self, board: chess.Board) -> None:
         """Set board."""
