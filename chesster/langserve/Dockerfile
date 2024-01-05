@@ -1,12 +1,13 @@
 FROM python:3.9
 
-WORKDIR /chesster
+WORKDIR .
 
-COPY . /chesster
+COPY . .
 
 RUN pip install poetry
 RUN poetry install
 
+ENV LANGSERVE_HOST=0.0.0.0
 EXPOSE 8001
 
-CMD ["poetry", "run", "python", "chesster/langserve/langserver.py"]
+CMD ["poetry", "run", "python", "langserver.py"]

@@ -7,7 +7,7 @@ from langchain.pydantic_v1 import BaseModel, Field
 from langserve import add_routes
 from typing_extensions import Annotated
 
-from chesster.langserve.agent import get_agent, get_tools
+from agent import get_agent, get_tools
 
 
 HOST = os.getenv("LANGSERVE_HOST", "localhost")
